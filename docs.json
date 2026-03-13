@@ -7,27 +7,20 @@
     "light": "#6B6B6B",
     "dark": "#D9D9D9"
   },
-  "favicon": "/favicon.svg",
   "navigation": {
     "tabs": [
       {
         "tab": "API",
-        "groups": [
-          {
-            "group": "Endpoints",
-            "pages": ["api-reference/endpoint/try-on"]
-          }
-        ]
+        "openapi": "api-reference/openapi.json"
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Introduction",
-          "href": "/",
-          "icon": "book-open-cover"
-        }
-      ]
+    ]
+  },
+  "api": {
+    "playground": {
+      "mode": "show"
+    },
+    "examples": {
+      "languages": ["curl", "python", "javascript", "node"]
     }
   },
   "logo": {
