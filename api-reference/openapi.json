@@ -44,8 +44,7 @@
                       "properties": {
                         "title": { "type": "string" },
                         "category": {
-                          "type": "string",
-                          "enum": ["tops", "bottoms", "outerwear"]
+                          "type": "string"
                         },
                         "images": {
                           "type": "array",
