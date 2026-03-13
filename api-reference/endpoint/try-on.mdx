@@ -1,0 +1,94 @@
+---
+title: "Try On"
+description: "Generate a Virtual Try-On"
+api: "POST /api/try-on"
+---
+
+### Headers
+
+<ParamField header="authorization" type="string" required>
+  Your API token for authorization.
+</ParamField>
+
+<ParamField header="content-type" type="string" required>
+  Must be `application/json`.
+</ParamField>
+
+### Body Parameters
+
+<ParamField body="userPhoto" type="string" required>
+  The user image to apply the try-on to.
+  <Expandable title="Supported formats">
+    - Public `http(s)` URL - Data URL (`data:image/...;base64,...`)
+  </Expandable>
+</ParamField>
+
+<ParamField body="products" type="array" required>
+  Array of products to try on. Minimum 1 item.
+  <Expandable title="Product object">
+    <ParamField body="title" type="string" required>
+      Product title used for model guidance.
+    </ParamField>
+    <ParamField body="category" type="string">
+      Optional category such as `tops`, `bottoms`, or `outerwear`.
+    </ParamField>
+    <ParamField body="images" type="array" required>
+      Product image URLs. Minimum 1 item.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="storeId" type="string">
+  Optional store ID. If provided, it must match the token-bound store.
+</ParamField>
+
+### Response
+
+<ResponseField name="image" type="string">
+  Generated try-on image as a base64 data URL, for example
+  `data:image/png;base64,...`.
+</ResponseField>
+
+<ResponseField name="code" type="string">
+  A status code for the operation. Possible values: - `TRY_ON_SUCCESS` -
+  `INVALID_REQUEST` - `UNAUTHORIZED` - `FORBIDDEN` - `RATE_LIMITED` -
+  `INTERNAL_ERROR`
+</ResponseField>
+
+<ResponseField name="error" type="string">
+  Error label when the request fails.
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Additional error details when the request fails.
+</ResponseField>
+
+<ResponseExample>
+  ```json Response
+  {
+    "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...",
+    "code": "TRY_ON_SUCCESS"
+  }
+  ```
+</ResponseExample>
+
+### Example cURL
+
+```bash
+curl -X POST "https://your-hemsy-host/api/try-on" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "userPhoto": "https://cdn.example.com/user-photo.jpg",
+    "products": [
+      {
+        "title": "Classic Oxford Shirt",
+        "category": "tops",
+        "images": [
+          "https://cdn.example.com/products/shirt-front.jpg",
+          "https://cdn.example.com/products/shirt-back.jpg"
+        ]
+      }
+    ]
+  }'
+```
