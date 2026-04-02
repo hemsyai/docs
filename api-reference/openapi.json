@@ -49,14 +49,6 @@
                             "variantId": {
                               "type": ["string", "number"],
                               "description": "Shopify variant ID (numeric ID or gid)."
-                            },
-                            "title": {
-                              "type": "string",
-                              "description": "Optional product title override."
-                            },
-                            "category": {
-                              "type": "string",
-                              "description": "Optional product category."
                             }
                           }
                         },
