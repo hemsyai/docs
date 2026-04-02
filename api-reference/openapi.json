@@ -20,7 +20,7 @@
       "post": {
         "operationId": "tryOn",
         "summary": "Try On",
-        "description": "Generate a virtual try-on image from a user photo and product images.",
+        "description": "Generate a virtual try-on image from a user photo and product image URLs, or Shopify product identifiers.",
         "tags": ["Endpoints"],
         "security": [{ "bearerAuth": [] }],
         "requestBody": {
@@ -40,18 +40,41 @@
                     "minItems": 1,
                     "items": {
                       "type": "object",
-                      "required": ["title", "images"],
+                      "description": "Provide product `images`, `productId`, or `variantId`.",
                       "properties": {
-                        "title": { "type": "string" },
+                        "title": {
+                          "type": "string",
+                          "description": "Optional product title. If omitted and an ID is provided, title is resolved from Shopify when available."
+                        },
                         "category": {
                           "type": "string"
                         },
                         "images": {
                           "type": "array",
-                          "items": { "type": "string" },
+                          "description": "HTTPS image URLs for the product.",
+                          "items": { "type": "string", "format": "uri" },
                           "minItems": 1
+                        },
+                        "productId": {
+                          "description": "Shopify product ID (numeric ID or gid). Use as an alternative to `images`.",
+                          "oneOf": [
+                            { "type": "string" },
+                            { "type": "number" }
+                          ]
+                        },
+                        "variantId": {
+                          "description": "Shopify variant ID (numeric ID or gid). Use as an alternative to `images`.",
+                          "oneOf": [
+                            { "type": "string" },
+                            { "type": "number" }
+                          ]
                         }
-                      }
+                      },
+                      "anyOf": [
+                        { "required": ["images"] },
+                        { "required": ["productId"] },
+                        { "required": ["variantId"] }
+                      ]
                     }
                   }
                 }
