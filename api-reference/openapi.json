@@ -39,43 +39,72 @@
                     "type": "array",
                     "minItems": 1,
                     "items": {
-                      "type": "object",
-                      "description": "Provide product `images`, `productId`, or `variantId`.",
-                      "properties": {
-                        "title": {
-                          "type": "string",
-                          "description": "Optional product title. If omitted and an ID is provided, title is resolved from Shopify when available."
+                      "description": "For each product, choose one option: `variantId` or `images`.",
+                      "oneOf": [
+                        {
+                          "title": "Variant ID",
+                          "type": "object",
+                          "required": ["variantId"],
+                          "properties": {
+                            "variantId": {
+                              "type": ["string", "number"],
+                              "description": "Shopify variant ID (numeric ID or gid)."
+                            },
+                            "title": {
+                              "type": "string",
+                              "description": "Optional product title override."
+                            },
+                            "category": {
+                              "type": "string",
+                              "description": "Optional product category."
+                            }
+                          }
                         },
-                        "category": {
-                          "type": "string"
-                        },
-                        "images": {
-                          "type": "array",
-                          "description": "HTTPS image URLs for the product.",
-                          "items": { "type": "string", "format": "uri" },
-                          "minItems": 1
-                        },
-                        "productId": {
-                          "description": "Shopify product ID (numeric ID or gid). Use as an alternative to `images`.",
-                          "oneOf": [
-                            { "type": "string" },
-                            { "type": "number" }
-                          ]
-                        },
-                        "variantId": {
-                          "description": "Shopify variant ID (numeric ID or gid). Use as an alternative to `images`.",
-                          "oneOf": [
-                            { "type": "string" },
-                            { "type": "number" }
-                          ]
+                        {
+                          "title": "Images",
+                          "type": "object",
+                          "required": ["images"],
+                          "properties": {
+                            "images": {
+                              "type": "array",
+                              "description": "Product image sources. Supports HTTPS URLs and base64 data URLs.",
+                              "items": { "type": "string", "format": "uri" },
+                              "minItems": 1
+                            },
+                            "title": {
+                              "type": "string",
+                              "description": "Optional product title."
+                            },
+                            "category": {
+                              "type": "string",
+                              "description": "Optional product category."
+                            }
+                          }
                         }
-                      },
-                      "anyOf": [
-                        { "required": ["images"] },
-                        { "required": ["productId"] },
-                        { "required": ["variantId"] }
                       ]
                     }
+                  }
+                }
+              },
+              "examples": {
+                "usingVariantId": {
+                  "summary": "Use variantId",
+                  "value": {
+                    "userPhoto": "https://cdn.example.com/user-photo.jpg",
+                    "products": [{ "variantId": "44772123456789" }]
+                  }
+                },
+                "usingImages": {
+                  "summary": "Use image URLs",
+                  "value": {
+                    "userPhoto": "https://cdn.example.com/user-photo.jpg",
+                    "products": [
+                      {
+                        "title": "Black Mini Dress",
+                        "category": "dress",
+                        "images": ["https://cdn.example.com/products/black-mini-dress-front.jpg"]
+                      }
+                    ]
                   }
                 }
               }
