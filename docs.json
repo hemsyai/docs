@@ -13,6 +13,15 @@
       {
         "tab": "API",
         "openapi": "api-reference/openapi.json"
+      },
+      {
+        "tab": "Embed",
+        "groups": [
+          {
+            "group": "Guides",
+            "pages": ["hemsy-embed-bundle-closet-payloads"]
+          }
+        ]
       }
     ]
   },
