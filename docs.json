@@ -12,14 +12,14 @@
     "tabs": [
       {
         "tab": "API",
-        "openapi": "api-reference/openapi.json"
-      },
-      {
-        "tab": "Embed",
         "groups": [
           {
+            "group": "API Reference",
+            "openapi": "api-reference/openapi.json"
+          },
+          {
             "group": "Guides",
-            "pages": ["hemsy-embed-bundle-closet-payloads"]
+            "pages": ["embeds"]
           }
         ]
       }
