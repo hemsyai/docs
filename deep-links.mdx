@@ -363,27 +363,6 @@ https://example.com/?share=abc123&anonymous_id=visitor-42
 
 ---
 
-## Preview/tenant targeting
-
-On Vercel preview deployments, nested tenant subdomains aren't covered by the
-default TLS cert, so tenants are selected via query param:
-
-```txt
-https://preview-host.vercel.app/?store=<tenant-slug>&closet=<encoded>
-```
-
-With visitor attribution:
-
-```txt
-https://preview-host.vercel.app/?store=<tenant-slug>&closet=<encoded>&anonymous_id=visitor-42
-```
-
-The generator preserves `?store=` across generated share links automatically.
-When you construct closet URLs yourself on a preview host, append
-`&store=<slug>` manually.
-
----
-
 ## Building a Closet URL
 
 The URL-safe Base64 step is the only gotcha. In JavaScript:
