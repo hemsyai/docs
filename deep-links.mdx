@@ -56,31 +56,25 @@ Use it when launching Hemsy from:
 Example:
 
 ```txt
-https://example.com/?anonymous_id=visitor-42
+https://yourstore.hemsy.ai/?anonymous_id=visitor-42
 ```
 
 Combined with a closet payload:
 
 ```txt
-https://example.com/?closet=<encoded>&anonymous_id=visitor-42
+https://yourstore.hemsy.ai/?closet=<encoded>&anonymous_id=visitor-42
 ```
 
 Combined with a product shortcut:
 
 ```txt
-https://example.com/?product=organic-cotton-duvet&anonymous_id=visitor-42
+https://yourstore.hemsy.ai/?product=organic-cotton-duvet&anonymous_id=visitor-42
 ```
 
 Combined with a shared look:
 
 ```txt
-https://example.com/?share=abc123&anonymous_id=visitor-42
-```
-
-On preview deployments:
-
-```txt
-https://preview-host.vercel.app/?store=<tenant-slug>&closet=<encoded>&anonymous_id=visitor-42
+https://yourstore.hemsy.ai/?share=abc123&anonymous_id=visitor-42
 ```
 
 ### What `anonymous_id` does
@@ -101,10 +95,10 @@ When present, Hemsy uses `anonymous_id` to:
 
 <Warning>
   If a shopper visits a Hemsy-hosted URL directly, for example by typing
-  `https://store.hemsy.ai/` into the browser, Hemsy cannot infer the anonymous
-  visitor ID from the merchant's storefront domain. The storefront must pass the
-  ID explicitly via `anonymous_id` in the URL or via the embed script
-  configuration.
+  `https://yourstore.hemsy.ai/` into the browser, Hemsy cannot infer the
+  anonymous visitor ID from the merchant's storefront domain. The storefront
+  must pass the ID explicitly via `anonymous_id` in the URL or via the embed
+  script configuration.
 </Warning>
 
 ---
