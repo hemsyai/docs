@@ -19,7 +19,7 @@
           },
           {
             "group": "Guides",
-            "pages": ["embeds", "closet-urls"]
+            "pages": ["embeds", "deep-links"]
           }
         ]
       }

@@ -1,6 +1,6 @@
 ---
 title: "Hemsy Embeds"
-description: "Launch Hemsy on your storefront — blank, pre-loaded with products, or inside a guided flow."
+description: "Launch Hemsy on your storefront: blank, pre-loaded with products, or inside a guided flow."
 ---
 
 ## Script Setup
@@ -9,96 +9,95 @@ description: "Launch Hemsy on your storefront — blank, pre-loaded with product
 <script
   src="https://hemsy.ai/hemsy-embed.js"
   data-hemsy-subdomain="your-store-subdomain"
-  data-hemsy-selector="#open-hemsy"
+  data-hemsy-selector=".hemsy-launcher"
   defer
 ></script>
 ```
 
-One `data-hemsy-selector` is all you need. Any element matching it becomes a Hemsy launcher. The **mode** (scratch, product context, explicit closet, or flow) is decided per-element from the attributes you put on the button itself — so a single selector can back a nav link, a PDP button, and a bundle CTA all at once.
+Use a shared class selector like `.hemsy-launcher` when multiple elements should open Hemsy. Avoid reusing the same `id` on multiple elements.
+
+Any element matching `data-hemsy-selector` becomes a Hemsy launcher. The launch behavior is decided per element from attributes on that exact clicked element.
 
 ## Required Attributes
 
-- `data-hemsy-subdomain`: Your Hemsy store subdomain. Find it in your [Dashboard Settings](https://dashboard.hemsy.ai/settings).
-- `data-hemsy-selector`: CSS selector for any element(s) that should launch Hemsy.
+- `data-hemsy-subdomain`: Your Hemsy store subdomain. For `mystore.hemsy.ai`, use `"mystore"`.
+- `data-hemsy-selector`: CSS selector for elements that should launch Hemsy.
 
 ## Script Attributes Reference
 
-| Attribute                 | Required | Example         | Description                                                                   |
-| ------------------------- | -------- | --------------- | ----------------------------------------------------------------------------- |
-| `data-hemsy-subdomain`    | true     | `mystore`       | Your Hemsy store subdomain. For `mystore.hemsy.ai` → `"mystore"`.             |
-| `data-hemsy-selector`     | true     | `"#open-hemsy"` | CSS selector for elements that launch Hemsy.                                  |
-| `data-hemsy-anonymous-id` | false    | `"visitor-42"`  | Anonymous visitor ID passed through to Hemsy for analytics / personalization. |
+| Attribute                 | Required | Example             | Description                                                                    |
+| ------------------------- | -------- | ------------------- | ------------------------------------------------------------------------------ |
+| `data-hemsy-subdomain`    | true     | `"mystore"`         | Your Hemsy store subdomain.                                                    |
+| `data-hemsy-selector`     | true     | `".hemsy-launcher"` | CSS selector for elements that launch Hemsy.                                   |
+| `data-hemsy-anonymous-id` | false    | `"visitor-42"`      | Anonymous visitor ID passed through to Hemsy for analytics and order metadata. |
 
-## Trigger Attributes
+## Launcher Attributes
 
-Attach these to any element matching `data-hemsy-selector` (or any element with `data-hemsy-trigger`).
+Attach these to any element matching `data-hemsy-selector`.
 
-| Attribute                         | Example         | Description                                                                                                      |
-| --------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `data-hemsy-auto-product-context` | `"true"`        | Auto-build a closet payload from the current PDP variant. Falls back to scratch if no variant is on the page.    |
-| `data-hemsy-closet`               | `"eyJwcm9k..."` | Explicit URL-safe base64 closet payload. Use this for bundles or curated looks.                                  |
-| `data-hemsy-flow`                 | `"<flowId>"`    | Launch directly into a guided flow from your [Flows](https://dashboard.hemsy.ai/flows) library.                  |
-| `data-hemsy-trigger`              | _(any value)_   | Marks an element as a launcher even if it doesn't match `data-hemsy-selector`. Mode is still derived from above. |
+| Attribute                         | Example         | Description                                                                                                 |
+| --------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------- |
+| `data-hemsy-auto-product-context` | `"true"`        | Auto-builds a closet payload from the current PDP variant. Falls back to scratch if no variant is detected. |
+| `data-hemsy-closet`               | `"eyJwcm9k..."` | Explicit URL-safe base64 closet payload. Use this for bundles or curated looks.                             |
+| `data-hemsy-flow`                 | `"<flowId>"`    | Adds a guided flow to the launch. Must be on the clicked launcher element.                                  |
 
-### Mode resolution (per element)
+## Mode Resolution
 
-Evaluated in order, first match wins:
+Evaluated per clicked element, in this order:
 
-1. `data-hemsy-auto-product-context="true"` → closet mode w/ synthesized payload (scratch fallback if no variant detected).
-2. `data-hemsy-closet="<base64>"` → closet mode w/ that exact payload.
-3. _(nothing)_ → scratch mode.
+1. `data-hemsy-auto-product-context="true"`: closet mode with a synthesized product payload, or scratch if no product variant is detected.
+2. `data-hemsy-closet="<base64>"`: closet mode with that exact payload.
+3. Nothing else: scratch mode.
 
-`data-hemsy-flow` composes with any of the above — it's always honored regardless of mode.
+`data-hemsy-flow` composes with any of the above. A flow-only launcher opens scratch mode with the flow applied.
 
 ## Examples
 
-### Scratch launcher (nav / homepage)
+### Scratch Launcher
 
 ```html
-<a id="open-hemsy" href="#">Design a look</a>
+<a class="hemsy-launcher" href="#">Design a look</a>
 ```
 
-### PDP launcher (auto-loads current product)
+### PDP Launcher
 
 ```html
-<button id="open-hemsy" data-hemsy-auto-product-context="true">
+<button class="hemsy-launcher" data-hemsy-auto-product-context="true">
   Try with this product
 </button>
 ```
 
-### Flow launcher
+### Flow Launcher
 
 ```html
-<button id="open-hemsy" data-hemsy-flow="YOUR_FLOW_ID">Build a bed</button>
-```
-
-### Bundle launcher (explicit closet payload)
-
-```html
-<button id="open-hemsy" data-hemsy-closet="YOUR_URLSAFE_BASE64_CLOSET_PAYLOAD">
-  Try on Bed Bundle
+<button class="hemsy-launcher" data-hemsy-flow="YOUR_FLOW_ID">
+  Build a bed
 </button>
 ```
 
-<Note>
-  Always wrap `data-hemsy-closet` values in quotes. URL-safe base64 strings can
-  contain `=` characters that will break unquoted HTML parsing.
-</Note>
+### Bundle Launcher
+
+```html
+<button
+  class="hemsy-launcher"
+  data-hemsy-closet="YOUR_URLSAFE_BASE64_CLOSET_PAYLOAD"
+>
+  Try on Bed Bundle
+</button>
+```
 
 ## Closet Payload
 
 | Field                   | Required | Type                                    | Notes                                                                 |
 | ----------------------- | -------- | --------------------------------------- | --------------------------------------------------------------------- |
 | `products`              | true     | `Array<object>`                         | Must contain at least 1 product.                                      |
-| `products[].variantId`  | false    | `number \| string`                      | Preferred identifier (most reliable).                                 |
+| `products[].variantId`  | false    | `number \| string`                      | Preferred identifier and most reliable.                               |
 | `products[].productId`  | false    | `number \| string`                      | Fallback identifier when `variantId` is unavailable.                  |
 | `products[].attributes` | false    | `Array<{ key: string; value: string }>` | Optional line-item attributes passed through to checkout/cart create. |
 
-<Note>
-  Each product must include at least one identifier: `variantId` or `productId`.
-</Note>
+Each product must include at least one identifier: `variantId` or `productId`.
 
-### Minimal Example
+### Minimal Closet Payload Example
 
 ```json
 {
@@ -134,15 +133,20 @@ function toUrlSafeBase64(obj) {
 }
 ```
 
+<Note>
+  Always wrap `data-hemsy-closet` values in quotes. URL-safe base64 strings can
+  contain `=` characters that will break unquoted HTML parsing.
+</Note>
+
 ## Programmatic API
 
-If you'd rather open Hemsy from JavaScript (e.g. from an analytics callback or custom event), use `window.HemsyEmbed`:
+If you'd rather open Hemsy from JavaScript, use `window.HemsyEmbed`:
 
 ```js
 // Scratch
 HemsyEmbed.open("scratch");
 
-// Product context (auto-built from current page)
+// Product context, auto-built from current page
 HemsyEmbed.open({ payload: { autoProductContext: true } });
 
 // Explicit closet payload
@@ -161,26 +165,68 @@ HemsyEmbed.close();
 <script
   src="https://hemsy.ai/hemsy-embed.js"
   data-hemsy-subdomain="your-store-subdomain"
-  data-hemsy-selector="#open-hemsy"
+  data-hemsy-selector=".hemsy-launcher"
+  data-hemsy-anonymous-id="visitor-42"
   defer
 ></script>
 
 <!-- Nav: design anything from scratch -->
-<a id="open-hemsy" href="#">Design a look</a>
+<a class="hemsy-launcher" href="#"> Design a look </a>
 
 <!-- PDP: try with the product currently on screen -->
-<button id="open-hemsy" data-hemsy-auto-product-context="true">
+<button class="hemsy-launcher" data-hemsy-auto-product-context="true">
   Try with this product
 </button>
 
 <!-- Bundle: pre-loaded closet -->
 <button
-  id="open-hemsy"
+  class="hemsy-launcher"
   data-hemsy-closet="eyJwcm9kdWN0cyI6W3sidmFyaWFudElkIjoxMjM0NTY3ODkwLCJhdHRyaWJ1dGVzIjpbeyJrZXkiOiJfYnVuZGxlVGl0bGUiLCJ2YWx1ZSI6Ik15IEJ1bmRsZSJ9XX1dfQ"
 >
   Try on Bundle
 </button>
 
 <!-- Flow: guided build -->
-<button id="open-hemsy" data-hemsy-flow="YOUR_FLOW_ID">Build a bed</button>
+<button class="hemsy-launcher" data-hemsy-flow="YOUR_FLOW_ID">
+  Build a bed
+</button>
+```
+
+## Common Mistake
+
+Do not use `data-hemsy-trigger`:
+
+```html
+<a href="https://your-store.hemsy.ai/" data-hemsy-trigger="closet">
+  Design Your Bed
+</a>
+```
+
+`data-hemsy-trigger` is not a supported launcher configuration. Specify `data-hemsy-selector` on the script tag, then make the clickable element match that selector.
+
+Use this instead for a flow:
+
+```html
+<script
+  src="https://hemsy.ai/hemsy-embed.js"
+  data-hemsy-subdomain="your-store-subdomain"
+  data-hemsy-selector=".hemsy-launcher"
+  defer
+></script>
+
+<a href="#" class="hemsy-launcher" data-hemsy-flow="YOUR_FLOW_ID">
+  Design Your Bed
+</a>
+```
+
+Or this for an explicit closet:
+
+```html
+<a
+  href="#"
+  class="hemsy-launcher"
+  data-hemsy-closet="YOUR_URLSAFE_BASE64_CLOSET_PAYLOAD"
+>
+  Design Your Bed
+</a>
 ```

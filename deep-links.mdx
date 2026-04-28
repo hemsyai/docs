@@ -1,0 +1,422 @@
+---
+title: "Deep Links"
+description: "Pre-populate a shopper's Hemsy session with products, bundles, shared looks, and attribution data via URL parameters."
+---
+
+## Overview
+
+A **Closet URL** is a shareable link that pre-populates the Hemsy experience
+with a specific set of products and optional per-item metadata the moment the
+shopper lands on the page. It's how merchants launch customers into Hemsy from
+product pages, emails, ads, blog posts, collection tiles, or bundle landing
+pages without making them rebuild their look from scratch.
+
+Hemsy supports these query parameters for pre-populating or attributing a
+session:
+
+| Param            | Purpose                                                                                  |
+| ---------------- | ---------------------------------------------------------------------------------------- |
+| `?closet=`       | Base64-encoded payload for **one or more products**, with optional line-item attributes. |
+| `?product=`      | Shortcut for a **single product** by Shopify ID or handle.                               |
+| `?share=`        | A **shared look** short ID, used by the in-app Share feature.                            |
+| `?anonymous_id=` | Anonymous visitor ID passed into Hemsy for analytics, attribution, and integrations.     |
+
+All of these can be combined with `?store=<slug>` on preview deployments to
+target a specific tenant.
+
+<Note>
+  `?closet=` is the canonical, structured format. Use it for anything beyond a
+  single-product deep link, and **always** use it when you need to attach bundle
+  attributes.
+</Note>
+
+<Note>
+  Include `anonymous_id` whenever the storefront has an anonymous visitor ID
+  available. Today, Hemsy uses it for Twilio Segment tracking and checkout/order
+  attribution. Longer term, it should be treated as the shared anonymous
+  identity for all integrations that need to connect Hemsy activity back to
+  storefront activity.
+</Note>
+
+---
+
+## `anonymous_id` — Visitor attribution
+
+`anonymous_id` is an optional query parameter that lets the merchant storefront
+tell Hemsy which anonymous visitor is opening the experience.
+
+Use it when launching Hemsy from:
+
+- Embedded storefront buttons
+- Product page links
+- Bundle landing pages
+- Email or ad links where the visitor ID is available
+- Any integration that wants to reconcile Hemsy events with storefront behavior
+
+Example:
+
+```txt
+https://example.com/?anonymous_id=visitor-42
+```
+
+Combined with a closet payload:
+
+```txt
+https://example.com/?closet=<encoded>&anonymous_id=visitor-42
+```
+
+Combined with a product shortcut:
+
+```txt
+https://example.com/?product=organic-cotton-duvet&anonymous_id=visitor-42
+```
+
+Combined with a shared look:
+
+```txt
+https://example.com/?share=abc123&anonymous_id=visitor-42
+```
+
+On preview deployments:
+
+```txt
+https://preview-host.vercel.app/?store=<tenant-slug>&closet=<encoded>&anonymous_id=visitor-42
+```
+
+### What `anonymous_id` does
+
+When present, Hemsy uses `anonymous_id` to:
+
+- Attach the visitor identity to Hemsy analytics events.
+- Pass the same identity through checkout creation, so it can surface on the
+  Shopify order as an additional detail/custom attribute when the order is
+  placed through Hemsy checkout.
+- Provide a stable identity key for supported integrations.
+
+<Note>
+  Current integration support is focused on Twilio Segment. Merchants should
+  still pass `anonymous_id` consistently now so Hemsy can use the same identity
+  for additional integrations as they are added.
+</Note>
+
+<Warning>
+  If a shopper visits a Hemsy-hosted URL directly, for example by typing
+  `https://store.hemsy.ai/` into the browser, Hemsy cannot infer the anonymous
+  visitor ID from the merchant's storefront domain. The storefront must pass the
+  ID explicitly via `anonymous_id` in the URL or via the embed script
+  configuration.
+</Warning>
+
+---
+
+## `?closet=` — Structured payload
+
+### Format
+
+The value of `closet` is a **URL-safe Base64** encoding of a JSON object:
+
+```json
+{
+  "products": [
+    {
+      "variantId": 1111111111111,
+      "attributes": [
+        { "key": "_bundleId", "value": "gid://shopify/Product/9999999999999" }
+      ]
+    },
+    {
+      "productId": 2222222222222
+    }
+  ]
+}
+```
+
+URL-safe Base64 means the standard Base64 string with:
+
+- `+` replaced with `-`
+- `/` replaced with `_`
+- Trailing `=` padding stripped
+
+Then appended to the URL as `?closet=<encoded>`.
+
+### Product entry schema
+
+Each entry in the `products` array supports the following fields:
+
+| Field        | Type                                    | Required        | Notes                                                                                            |
+| ------------ | --------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------ |
+| `variantId`  | `number \| string`                      | one of required | Preferred identifier. Accepts a numeric ID or a Shopify GID: `gid://shopify/ProductVariant/...`. |
+| `productId`  | `number \| string`                      | one of required | Fallback when you don't know the variant. Accepts a numeric ID or a GID.                         |
+| `attributes` | `Array<{ key: string; value: string }>` | optional        | Line-item attributes forwarded into the Shopify cart at checkout.                                |
+
+<Warning>
+  At least one of `variantId` or `productId` **must** be present. Entries
+  without either are silently dropped. `variantId` takes precedence when both
+  are provided.
+</Warning>
+
+### Minimal example — single product
+
+```json
+{ "products": [{ "variantId": 1111111111111 }] }
+```
+
+Base64-encoded and appended:
+
+```txt
+https://example.com/?closet=eyJwcm9kdWN0cyI6W3sidmFyaWFudElkIjoxMTExMTExMTExMTExfV19
+```
+
+With visitor attribution:
+
+```txt
+https://example.com/?closet=eyJwcm9kdWN0cyI6W3sidmFyaWFudElkIjoxMTExMTExMTExMTExfV19&anonymous_id=visitor-42
+```
+
+### Example — multiple products
+
+```json
+{
+  "products": [
+    { "variantId": 1111111111111 },
+    { "variantId": 1111111111112 },
+    { "productId": 2222222222222 }
+  ]
+}
+```
+
+---
+
+## Line-item attributes
+
+Every entry in `products` may include an `attributes` array. These are key/value
+pairs that get forwarded verbatim to Shopify's Storefront API `cartCreate`
+mutation when the shopper checks out, and they surface on the resulting Shopify
+order.
+
+Use attributes to:
+
+- Track the **source** of a selection, such as `"utm_campaign"` or `"source"`.
+- Tag items as part of a **bundle**.
+- Pass through arbitrary merchant metadata you want on the order.
+
+```json
+{
+  "attributes": [
+    { "key": "source", "value": "email-campaign" },
+    { "key": "campaign", "value": "summer-sale" }
+  ]
+}
+```
+
+<Note>
+  Attribute keys that start with an underscore (`_`) are treated as **private**
+  in Shopify's admin. They appear on the order but are hidden from the
+  storefront cart UI. Hemsy follows the same convention for its reserved keys.
+</Note>
+
+<Note>
+  Use the top-level URL query parameter `anonymous_id` for visitor identity. Do
+  not put visitor identity into each product's line-item attributes unless the
+  merchant has a separate order-reporting need for that data at the line-item
+  level.
+</Note>
+
+---
+
+## Bundles and the `_bundleId` reserved key
+
+Closet URLs are the canonical way to launch a **bundle** into Hemsy. A bundle is
+a group of products a merchant wants a shopper to try on and check out with
+together — for example, a "Starter Bedroom Bundle" composed of a sheet set, a
+blanket, and a pillow insert.
+
+To mark items as belonging to the same bundle, attach a set of reserved
+attributes to **every** product entry in the bundle.
+
+### Reserved bundle attribute keys
+
+| Key             | Required    | Purpose                                                                                                                                                                 |
+| --------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`_bundleId`** | **yes**     | Shopify GID or numeric ID of the parent bundle product. Presence of this key marks the line as a bundle member and is the signal Hemsy uses to enforce bundle behavior. |
+| `_uniqueId`     | recommended | Opaque per-instance identifier, such as `<bundle-handle>_<uuid>`. Use the **same** value for every product in a single bundle instance so orders can be reconciled.     |
+| `_bundleTitle`  | recommended | Human-readable bundle name. Surfaces on the order in Shopify admin.                                                                                                     |
+| `_bundleHandle` | recommended | The Shopify handle of the parent bundle product.                                                                                                                        |
+| `_bundlesource` | optional    | Origin of the bundle payload, such as `"hemsy"`.                                                                                                                        |
+
+<Warning>
+  **`_bundleId` is reserved.** Do not use this key for anything other than
+  marking bundle membership. Hemsy treats its presence as authoritative and
+  applies bundle-specific UX.
+</Warning>
+
+### Bundle behavior in Hemsy
+
+When any line item in the shopper's closet has a `_bundleId` attribute, Hemsy
+automatically:
+
+- **Hides the "Remove" button** for that item in the final _Review Your Order_
+  step. Bundles ship as a unit, and merchants almost always require every
+  component for checkout to succeed, so customers can't partially dismantle the
+  bundle from the review screen.
+- Forwards the full attribute set to Shopify's cart so downstream discount
+  rules, bundle-aware fulfillment logic, and order reporting all see the
+  grouping.
+
+### Full bundle example
+
+A three-line-item **Campers-Starter-Kit** bundle, Shopify handle
+`campers-starter-kit`, with the full set of bundle attributes on each line item
+and the same `_uniqueId` on every entry:
+
+```json
+{
+  "products": [
+    {
+      "productId": 3333333333333,
+      "attributes": [
+        {
+          "key": "_uniqueId",
+          "value": "campers-starter-kit_a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        },
+        { "key": "_bundleTitle", "value": "Campers-Starter-Kit" },
+        { "key": "_bundleHandle", "value": "campers-starter-kit" },
+        { "key": "_bundleId", "value": "gid://shopify/Product/9999999999999" },
+        { "key": "_bundlesource", "value": "hemsy" }
+      ]
+    },
+    {
+      "productId": 4444444444444,
+      "attributes": [
+        {
+          "key": "_uniqueId",
+          "value": "campers-starter-kit_a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        },
+        { "key": "_bundleTitle", "value": "Campers-Starter-Kit" },
+        { "key": "_bundleHandle", "value": "campers-starter-kit" },
+        { "key": "_bundleId", "value": "gid://shopify/Product/9999999999999" },
+        { "key": "_bundlesource", "value": "hemsy" }
+      ]
+    },
+    {
+      "productId": 5555555555555,
+      "attributes": [
+        {
+          "key": "_uniqueId",
+          "value": "campers-starter-kit_a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        },
+        { "key": "_bundleTitle", "value": "Campers-Starter-Kit" },
+        { "key": "_bundleHandle", "value": "campers-starter-kit" },
+        { "key": "_bundleId", "value": "gid://shopify/Product/9999999999999" },
+        { "key": "_bundlesource", "value": "hemsy" }
+      ]
+    }
+  ]
+}
+```
+
+<Tip>
+  Generate a fresh `_uniqueId`, such as a UUID v4, **per bundle instance**. That
+  way, if the same person buys the same bundle twice, each purchase is
+  reconcilable on its own.
+</Tip>
+
+---
+
+## `?product=` — Single-product shortcut
+
+For the common case of "launch Hemsy with one product pre-loaded", `?product=`
+accepts either:
+
+- A numeric Shopify **product ID**: `?product=8888888888888`
+- A Shopify **GID**: `?product=gid://shopify/Product/8888888888888`
+- A product **handle**: `?product=organic-cotton-duvet`
+
+```txt
+https://example.com/?product=organic-cotton-duvet
+```
+
+With visitor attribution:
+
+```txt
+https://example.com/?product=organic-cotton-duvet&anonymous_id=visitor-42
+```
+
+This shortcut does **not** support line-item attributes. If you need to attach
+bundle metadata, UTM tags, or any other attributes, use `?closet=` instead.
+
+---
+
+## `?share=` — Shared-look links
+
+`?share=<shortId>` is reserved for links generated by Hemsy's in-app Share
+feature. The short ID resolves server-side to a previously saved look: user
+photo, generated image, and full selection. You don't need to construct these
+yourself. They're produced by the app when a shopper taps **Share**.
+
+If the storefront knows the visitor identity, append `anonymous_id` to shared
+look links too:
+
+```txt
+https://example.com/?share=abc123&anonymous_id=visitor-42
+```
+
+---
+
+## Preview/tenant targeting
+
+On Vercel preview deployments, nested tenant subdomains aren't covered by the
+default TLS cert, so tenants are selected via query param:
+
+```txt
+https://preview-host.vercel.app/?store=<tenant-slug>&closet=<encoded>
+```
+
+With visitor attribution:
+
+```txt
+https://preview-host.vercel.app/?store=<tenant-slug>&closet=<encoded>&anonymous_id=visitor-42
+```
+
+The generator preserves `?store=` across generated share links automatically.
+When you construct closet URLs yourself on a preview host, append
+`&store=<slug>` manually.
+
+---
+
+## Building a Closet URL
+
+The URL-safe Base64 step is the only gotcha. In JavaScript:
+
+```js
+function buildClosetUrl(origin, pathname, payload, anonymousId) {
+  const encoded = btoa(JSON.stringify(payload))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+
+  const params = new URLSearchParams({ closet: encoded });
+  if (anonymousId) {
+    params.set("anonymous_id", anonymousId);
+  }
+
+  return `${origin}${pathname}?${params.toString()}`;
+}
+```
+
+In other languages, use that language's standard URL-safe Base64 without
+padding encoder, such as `base64.urlsafe_b64encode(...).rstrip("=")` in Python.
+
+---
+
+## Validation checklist
+
+Before shipping a Closet URL in production, confirm:
+
+- [ ] Every product entry has `variantId` **or** `productId`.
+- [ ] IDs are numeric or full GIDs — not handles. Handles only work with `?product=`.
+- [ ] Base64 is URL-safe: `-` and `_`, with no trailing `=`.
+- [ ] `anonymous_id` is included whenever the storefront has an anonymous visitor ID available.
+- [ ] For bundles: **every** item has `_bundleId`, and all items share the same `_uniqueId`.
+- [ ] You aren't using `_bundleId` for non-bundle use cases.
+- [ ] The link round-trips through `atob` and `JSON.parse` successfully.
