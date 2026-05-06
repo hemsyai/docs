@@ -159,6 +159,90 @@ HemsyEmbed.open("scratch", { flow: "YOUR_FLOW_ID" });
 HemsyEmbed.close();
 ```
 
+## Event Callbacks
+
+Listen for events from the Hemsy embed to sync with your cart state:
+
+```javascript
+window.HemsyEmbedConfig = {
+  subdomain: "your-store-subdomain",
+  selector: ".hemsy-launcher",
+  onItemAdded: function (item) {
+    // item.variantId - Shopify variant ID (string)
+    // item.quantity - always 1
+    console.log("Added to bag:", item.variantId);
+  },
+  onItemRemoved: function (item) {
+    // item.variantId - Shopify variant ID (string)
+    console.log("Removed from bag:", item.variantId);
+  },
+};
+```
+
+### Available Callbacks
+
+| Callback        | Payload                                   | Description                      |
+| --------------- | ----------------------------------------- | -------------------------------- |
+| `onItemAdded`   | `{ variantId: string, quantity: number }` | Fired when item added to bag     |
+| `onItemRemoved` | `{ variantId: string }`                   | Fired when item removed from bag |
+
+### Hydrogen Example
+
+```jsx
+import { useCart } from "@shopify/hydrogen";
+
+function HemsyEmbedSetup() {
+  const { linesAdd, linesRemove, lines } = useCart();
+
+  useEffect(() => {
+    window.HemsyEmbedConfig = {
+      subdomain: "your-store",
+      selector: ".hemsy-launcher",
+      onItemAdded: ({ variantId, quantity }) => {
+        linesAdd([
+          {
+            merchandiseId: `gid://shopify/ProductVariant/${variantId}`,
+            quantity,
+          },
+        ]);
+      },
+      onItemRemoved: ({ variantId }) => {
+        // Find and remove the line item
+        const lineToRemove = lines?.find(
+          (line) =>
+            line.merchandise.id === `gid://shopify/ProductVariant/${variantId}`,
+        );
+        if (lineToRemove) {
+          linesRemove([lineToRemove.id]);
+        }
+      },
+    };
+  }, [linesAdd, linesRemove, lines]);
+
+  return null;
+}
+```
+
+<Note>
+  Event callbacks fire immediately when items are added or removed from the bag
+  inside the Hemsy embed. The `variantId` is the numeric Shopify variant ID as a
+  string, which you'll need to convert to a GID format for Hydrogen's cart
+  operations.
+</Note>
+
+---
+
+Also update the "Script Attributes Reference" table to mention callbacks:
+
+| Attribute                 | Required | Example             | Description                                                                    |
+| ------------------------- | -------- | ------------------- | ------------------------------------------------------------------------------ |
+| `data-hemsy-subdomain`    | true     | `"mystore"`         | Your Hemsy store subdomain.                                                    |
+| `data-hemsy-selector`     | true     | `".hemsy-launcher"` | CSS selector for elements that launch Hemsy.                                   |
+| `data-hemsy-anonymous-id` | false    | `"visitor-42"`      | Anonymous visitor ID passed through to Hemsy for analytics and order metadata. |
+
+Note: For event callbacks (`onItemAdded`, `onItemRemoved`), use `window.HemsyEmbedConfig`
+instead of data attributes. See the Event Callbacks section below.
+
 ## End-to-End Example
 
 ```html
