@@ -25,11 +25,14 @@ Any element matching `data-hemsy-selector` becomes a Hemsy launcher. The launch 
 
 ## Script Attributes Reference
 
-| Attribute                 | Required | Example             | Description                                                                    |
-| ------------------------- | -------- | ------------------- | ------------------------------------------------------------------------------ |
-| `data-hemsy-subdomain`    | true     | `"mystore"`         | Your Hemsy store subdomain.                                                    |
-| `data-hemsy-selector`     | true     | `".hemsy-launcher"` | CSS selector for elements that launch Hemsy.                                   |
-| `data-hemsy-anonymous-id` | false    | `"visitor-42"`      | Anonymous visitor ID passed through to Hemsy for analytics and order metadata. |
+| Attribute                 | Required | Example             | Description                                                                                       |
+| ------------------------- | -------- | ------------------- | ------------------------------------------------------------------------------------------------- |
+| `data-hemsy-subdomain`    | true     | `"mystore"`         | Your Hemsy store subdomain.                                                                       |
+| `data-hemsy-selector`     | true     | `".hemsy-launcher"` | CSS selector for elements that launch Hemsy.                                                      |
+| `data-hemsy-anonymous-id` | false    | `"visitor-42"`      | Anonymous visitor ID passed through to Hemsy for analytics and order metadata.                    |
+| `data-hemsy-mode`         | false    | `"cart"`            | Final action mode. Defaults to `"checkout"`; use `"cart"` to send variant data back to your site. |
+
+Note: For event callbacks (`onItemAdded`, `onItemRemoved`, `onProductVariantData`), use `window.HemsyEmbedConfig` instead of data attributes. See the Event Callbacks section below.
 
 ## Launcher Attributes
 
@@ -50,6 +53,25 @@ Evaluated per clicked element, in this order:
 3. Nothing else: scratch mode.
 
 `data-hemsy-flow` composes with any of the above. A flow-only launcher opens scratch mode with the flow applied.
+
+## Final Action Mode
+
+`data-hemsy-mode` is set on the script tag and controls what happens when the customer taps the final result CTA:
+
+- `checkout` (default): the CTA says "Go to Checkout" and Hemsy creates or opens a Shopify checkout/cart URL.
+- `cart`: the CTA says "Go to Cart", Hemsy posts `PRODUCT_VARIANT_DATA` to the parent page, calls `window.HemsyEmbedConfig.onProductVariantData(payload)`, and closes the modal.
+
+Use `cart` mode when your storefront owns cart state and should add the returned variants itself.
+
+```html
+<script
+  src="https://hemsy.ai/hemsy-embed.js"
+  data-hemsy-subdomain="your-store-subdomain"
+  data-hemsy-selector=".hemsy-launcher"
+  data-hemsy-mode="cart"
+  defer
+></script>
+```
 
 ## Examples
 
@@ -114,7 +136,7 @@ Each product must include at least one identifier: `variantId` or `productId`.
 
 - Best: provide `variantId` for each line item.
 - If `variantId` is missing, Hemsy falls back to `productId`.
-- `attributes` are preserved and passed to checkout line items.
+- `attributes` are preserved and passed to checkout line items or cart-mode callbacks.
 
 ## URL-Safe Base64 Encoding
 
@@ -159,6 +181,8 @@ HemsyEmbed.open("scratch", { flow: "YOUR_FLOW_ID" });
 HemsyEmbed.close();
 ```
 
+Set `mode` on the script tag or `window.HemsyEmbedConfig`; it applies to every launch from that embed script.
+
 ## Event Callbacks
 
 Listen for events from the Hemsy embed to sync with your cart state:
@@ -167,6 +191,7 @@ Listen for events from the Hemsy embed to sync with your cart state:
 window.HemsyEmbedConfig = {
   subdomain: "your-store-subdomain",
   selector: ".hemsy-launcher",
+  mode: "cart",
   onItemAdded: function (item) {
     // item.variantId - Shopify variant ID (string)
     // item.quantity - always 1
@@ -176,15 +201,21 @@ window.HemsyEmbedConfig = {
     // item.variantId - Shopify variant ID (string)
     console.log("Removed from bag:", item.variantId);
   },
+  onProductVariantData: function (payload) {
+    // Fired in cart mode when the final "Go to Cart" button is clicked.
+    // payload.items - Array<{ variantId: string, quantity: number, attributes?: Array<{ key: string, value: string }> }>
+    console.log("Send these variants to your cart:", payload.items);
+  },
 };
 ```
 
 ### Available Callbacks
 
-| Callback        | Payload                                   | Description                      |
-| --------------- | ----------------------------------------- | -------------------------------- |
-| `onItemAdded`   | `{ variantId: string, quantity: number }` | Fired when item added to bag     |
-| `onItemRemoved` | `{ variantId: string }`                   | Fired when item removed from bag |
+| Callback               | Payload                                                                                                         | Description                                  |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| `onItemAdded`          | `{ variantId: string, quantity: number }`                                                                       | Fired when item added to bag                 |
+| `onItemRemoved`        | `{ variantId: string }`                                                                                         | Fired when item removed from bag             |
+| `onProductVariantData` | `{ items: Array<{ variantId: string, quantity: number, attributes?: Array<{ key: string, value: string }> }> }` | Fired in cart mode when final CTA is clicked |
 
 ### Hydrogen Example
 
@@ -192,12 +223,13 @@ window.HemsyEmbedConfig = {
 import { useCart } from "@shopify/hydrogen";
 
 function HemsyEmbedSetup() {
-  const { linesAdd, linesRemove, lines } = useCart();
+  const { linesAdd, linesRemove, lines, cartOpen } = useCart();
 
   useEffect(() => {
     window.HemsyEmbedConfig = {
       subdomain: "your-store",
       selector: ".hemsy-launcher",
+      mode: "cart",
       onItemAdded: ({ variantId, quantity }) => {
         linesAdd([
           {
@@ -216,8 +248,11 @@ function HemsyEmbedSetup() {
           linesRemove([lineToRemove.id]);
         }
       },
+      onProductVariantData: () => {
+        cartOpen();
+      },
     };
-  }, [linesAdd, linesRemove, lines]);
+  }, [linesAdd, linesRemove, lines, cartOpen]);
 
   return null;
 }
@@ -227,30 +262,30 @@ function HemsyEmbedSetup() {
   Event callbacks fire immediately when items are added or removed from the bag
   inside the Hemsy embed. The `variantId` is the numeric Shopify variant ID as a
   string, which you'll need to convert to a GID format for Hydrogen's cart
-  operations.
+  operations. In `cart` mode, `onProductVariantData` fires when the final "Go to
+  Cart" button is clicked.
 </Note>
-
----
-
-Also update the "Script Attributes Reference" table to mention callbacks:
-
-| Attribute                 | Required | Example             | Description                                                                    |
-| ------------------------- | -------- | ------------------- | ------------------------------------------------------------------------------ |
-| `data-hemsy-subdomain`    | true     | `"mystore"`         | Your Hemsy store subdomain.                                                    |
-| `data-hemsy-selector`     | true     | `".hemsy-launcher"` | CSS selector for elements that launch Hemsy.                                   |
-| `data-hemsy-anonymous-id` | false    | `"visitor-42"`      | Anonymous visitor ID passed through to Hemsy for analytics and order metadata. |
-
-Note: For event callbacks (`onItemAdded`, `onItemRemoved`), use `window.HemsyEmbedConfig`
-instead of data attributes. See the Event Callbacks section below.
 
 ## End-to-End Example
 
 ```html
+<script>
+  window.HemsyEmbedConfig = {
+    subdomain: "your-store-subdomain",
+    selector: ".hemsy-launcher",
+    mode: "cart",
+    onProductVariantData: function ({ items }) {
+      console.log("Add these items to your storefront cart:", items);
+    },
+  };
+</script>
+
 <script
   src="https://hemsy.ai/hemsy-embed.js"
   data-hemsy-subdomain="your-store-subdomain"
   data-hemsy-selector=".hemsy-launcher"
   data-hemsy-anonymous-id="visitor-42"
+  data-hemsy-mode="cart"
   defer
 ></script>
 
