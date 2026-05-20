@@ -9,19 +9,15 @@
   },
   "favicon": "/favicon.ico",
   "navigation": {
-    "tabs": [
+    "groups": [
       {
-        "tab": "API",
-        "groups": [
-          {
-            "group": "API Reference",
-            "openapi": "api-reference/openapi.json"
-          },
-          {
-            "group": "Guides",
-            "pages": ["embeds", "deep-links", "segment"]
-          }
-        ]
+        "group": "Guides",
+        "pages": ["embeds", "deep-links", "segment"]
+      },
+      {
+        "group": "API Reference",
+        "openapi": "api-reference/openapi.json",
+        "pages": ["POST /api/try-on"]
       }
     ]
   },

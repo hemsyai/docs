@@ -21,7 +21,6 @@
         "operationId": "tryOn",
         "summary": "Try On",
         "description": "Generate a virtual try-on image from a user photo and product image URLs, or Shopify product identifiers.",
-        "tags": ["Endpoints"],
         "security": [{ "bearerAuth": [] }],
         "requestBody": {
           "required": true,
@@ -131,11 +130,5 @@
         "scheme": "bearer"
       }
     }
-  },
-  "tags": [
-    {
-      "name": "Try On",
-      "description": "Endpoints for creating virtual try-on images."
-    }
-  ]
+  }
 }
