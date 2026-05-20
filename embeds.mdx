@@ -1,6 +1,6 @@
 ---
 title: "Hemsy Embeds"
-description: "Launch Hemsy on your storefront: blank, pre-loaded with products, or inside a guided flow."
+description: "Launch Hemsy on your storefront: blank, pre-loaded with products, with a shared look, or inside a guided flow."
 ---
 
 ## Script Setup
@@ -40,6 +40,7 @@ Attach these to any element matching `data-hemsy-selector`.
 
 | Attribute                         | Example         | Description                                                                                                 |
 | --------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------- |
+| `data-hemsy-share`                | `"<shareId>"`   | Opens a previously shared look by its short ID. Highest priority.                                           |
 | `data-hemsy-auto-product-context` | `"true"`        | Auto-builds a closet payload from the current PDP variant. Falls back to scratch if no variant is detected. |
 | `data-hemsy-closet`               | `"eyJwcm9k..."` | Explicit URL-safe base64 closet payload. Use this for bundles or curated looks.                             |
 | `data-hemsy-flow`                 | `"<flowId>"`    | Adds a guided flow to the launch. Must be on the clicked launcher element.                                  |
@@ -48,9 +49,10 @@ Attach these to any element matching `data-hemsy-selector`.
 
 Evaluated per clicked element, in this order:
 
-1. `data-hemsy-auto-product-context="true"`: closet mode with a synthesized product payload, or scratch if no product variant is detected.
-2. `data-hemsy-closet="<base64>"`: closet mode with that exact payload.
-3. Nothing else: scratch mode.
+1. `data-hemsy-share="<shortId>"`: share mode with that shared look.
+2. `data-hemsy-auto-product-context="true"`: closet mode with a synthesized product payload, or scratch if no product variant is detected.
+3. `data-hemsy-closet="<base64>"`: closet mode with that exact payload.
+4. Nothing else: scratch mode.
 
 `data-hemsy-flow` composes with any of the above. A flow-only launcher opens scratch mode with the flow applied.
 
@@ -73,7 +75,7 @@ Use `cart` mode when your storefront owns cart state and should add the returned
 ></script>
 ```
 
-## Examples
+## Launcher Examples
 
 ### Scratch Launcher
 
@@ -97,7 +99,7 @@ Use `cart` mode when your storefront owns cart state and should add the returned
 </button>
 ```
 
-### Bundle Launcher
+### Closet Launcher
 
 ```html
 <button
@@ -107,6 +109,39 @@ Use `cart` mode when your storefront owns cart state and should add the returned
   Try on Bed Bundle
 </button>
 ```
+
+### Share Launcher
+
+Open a previously shared look directly:
+
+```html
+<button class="hemsy-launcher" data-hemsy-share="FreyjHz4">
+  View Shared Look
+</button>
+```
+
+This is useful for marketing campaigns, email links, or displaying shared looks on your storefront without requiring a page reload.
+
+## URL Parameter Auto-Open
+
+The embed script automatically detects `?share=` and `?closet=` URL parameters and opens the modal on page load:
+
+```
+https://your-store.com/?share=FreyjHz4
+https://your-store.com/?closet=eyJwcm9kdWN0cy...
+```
+
+This enables:
+
+- **Share links**: Customers can share their try-on results and recipients see the look immediately when they visit the link.
+- **Marketing campaigns**: Pre-load products via URL parameters in ads or emails.
+
+The URL parameter is automatically removed after opening to prevent re-triggering on page refresh.
+
+<Note>
+  For SPAs using client-side routing, the embed script also intercepts
+  `history.pushState` to detect URL changes after initial page load.
+</Note>
 
 ## Closet Payload
 
@@ -174,6 +209,9 @@ HemsyEmbed.open({ payload: { autoProductContext: true } });
 // Explicit closet payload
 HemsyEmbed.open("closet", { closet: "YOUR_URLSAFE_BASE64_CLOSET_PAYLOAD" });
 
+// Shared look by short ID
+HemsyEmbed.open("share", { share: "FreyjHz4" });
+
 // Into a flow
 HemsyEmbed.open("scratch", { flow: "YOUR_FLOW_ID" });
 
@@ -183,7 +221,7 @@ HemsyEmbed.close();
 
 Set `mode` on the script tag or `window.HemsyEmbedConfig`; it applies to every launch from that embed script.
 
-## Event Callbacks
+## Syncing Cart State
 
 Listen for events from the Hemsy embed to sync with your cart state:
 
@@ -209,7 +247,7 @@ window.HemsyEmbedConfig = {
 };
 ```
 
-### Available Callbacks
+### Available Event Callbacks
 
 | Callback               | Payload                                                                                                         | Description                                  |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
@@ -309,6 +347,11 @@ function HemsyEmbedSetup() {
 <button class="hemsy-launcher" data-hemsy-flow="YOUR_FLOW_ID">
   Build a bed
 </button>
+
+<!-- Share: open a previously shared look -->
+<button class="hemsy-launcher" data-hemsy-share="FreyjHz4">
+  View Shared Look
+</button>
 ```
 
 ## Common Mistake
@@ -347,5 +390,13 @@ Or this for an explicit closet:
   data-hemsy-closet="YOUR_URLSAFE_BASE64_CLOSET_PAYLOAD"
 >
   Design Your Bed
+</a>
+```
+
+Or this for a shared look:
+
+```html
+<a href="#" class="hemsy-launcher" data-hemsy-share="FreyjHz4">
+  View Shared Look
 </a>
 ```

@@ -19,7 +19,7 @@
           },
           {
             "group": "Guides",
-            "pages": ["embeds", "deep-links"]
+            "pages": ["embeds", "deep-links", "segment"]
           }
         ]
       }
