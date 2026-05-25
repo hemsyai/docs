@@ -1,11 +1,11 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "maple",
+  "theme": "mint",
   "name": "Hemsy | API Documentation",
   "colors": {
     "primary": "#090909",
     "light": "#6B6B6B",
-    "dark": "#D9D9D9"
+    "dark": "#090909"
   },
   "favicon": "/favicon.ico",
   "navigation": {
@@ -13,6 +13,10 @@
       {
         "group": "Guides",
         "pages": ["embeds", "deep-links", "segment"]
+      },
+      {
+        "group": "Dashboard",
+        "pages": ["permissions"]
       },
       {
         "group": "API Reference",
@@ -37,13 +41,13 @@
     "links": [
       {
         "label": "Support",
-        "href": "mailto:hi@mintlify.com"
+        "href": "mailto:support@hemsy.ai"
       }
     ],
     "primary": {
       "type": "button",
       "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
+      "href": "https://dashboard.hemsy.ai"
     }
   },
   "contextual": {

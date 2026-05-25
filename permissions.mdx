@@ -1,0 +1,107 @@
+---
+title: "Roles & permissions"
+description: "Owner, admin, and viewer access in the Hemsy merchant dashboard."
+---
+
+Hemsy organizations have **members**. Each member is assigned a **role** that controls what they can view and change. Roles can apply to **all stores** in the org or only **selected stores**.
+
+## Roles
+
+### Owner
+
+Owners have full control over the organization, including billing and destructive actions.
+
+- Manage billing, credits, and subscriptions
+- Purchase credits
+- Create, configure, and delete stores
+- Invite and remove team members, including other owners
+- Change member roles and store access scopes
+- Full read/write access to every assigned store
+
+### Admin
+
+Admins can run day-to-day operations but cannot manage billing or delete the organization or its stores.
+
+- View and edit store configuration, flows, integrations, and catalog settings
+- Invite and remove team members (except owners)
+- Cannot purchase credits or manage billing
+- Cannot delete stores or the organization
+- Cannot promote members to owner or demote owners
+
+### Viewer
+
+Viewers have read-only access to assigned stores.
+
+- View dashboards, analytics, and store settings
+- Cannot change configuration, invite users, or manage billing
+
+## Permission matrix
+
+Permissions apply within each member's **store access scope** (see below).
+
+| Capability | Owner | Admin | Viewer |
+| ---------- | ----- | ----- | ------ |
+| View dashboards and analytics | Yes | Yes | Yes |
+| View store settings | Yes | Yes | Yes |
+| Edit store configuration | Yes | Yes | No |
+| Manage flows | Yes | Yes | No |
+| Manage integrations | Yes | Yes | No |
+| Invite and remove members | Yes | Yes¹ | No |
+| Change member roles | Yes | No | No |
+| Purchase credits / manage billing | Yes | No | No |
+| Delete stores or organization | Yes | No | No |
+
+¹ Admins can invite and remove non-owner members. Only owners can invite other owners or change owner roles.
+
+## Store access scopes
+
+When you invite a member or edit their access, choose how broadly their role applies:
+
+- **All stores** — the role applies to every store in the organization.
+- **Selected stores** — the role applies only to the stores you assign. The member cannot see or access other stores.
+
+If a member has no access to a store, that store is hidden from their dashboard entirely.
+
+## What happens when access is denied
+
+Hemsy does not show disabled actions as grayed-out controls in every case. When a member lacks permission:
+
+- **No store access** — the store does not appear in navigation. Direct links to that store return a **404 / page not found** response.
+- **View-only user attempts a change** — the action is blocked with: *"You have view-only access..."*
+- **Admin attempts billing or delete** — the action is blocked with: *"Only organization owners can..."*
+
+## Team management
+
+Manage members from **Organization settings** in the Hemsy dashboard.
+
+- **Owners** can invite members, assign roles, set store access scopes, and remove any member (as long as at least one owner remains).
+- **Admins** can invite and remove admins and viewers on stores they can access. They cannot manage owners or billing.
+- **Viewers** cannot invite or manage team members.
+
+<Note>
+  Every organization must have at least one owner at all times. You cannot remove
+  the last owner from an organization.
+</Note>
+
+## FAQ
+
+<AccordionGroup>
+  <Accordion title="Can an organization have multiple owners?">
+    Yes. You can assign the owner role to multiple members. At least one owner
+    must remain on the organization at all times.
+  </Accordion>
+
+  <Accordion title="Can admins purchase credits?">
+    No. Only organization owners can purchase credits and manage billing.
+  </Accordion>
+
+  <Accordion title="Can a viewer see analytics for stores they are assigned to?">
+    Yes. Viewers can view dashboards and analytics for their assigned stores.
+    They cannot change settings or invite team members.
+  </Accordion>
+
+  <Accordion title="What if I need someone to manage integrations but not billing?">
+    Assign the **admin** role with access to the relevant stores. Admins can
+    manage integrations and store configuration without billing access.
+  </Accordion>
+</AccordionGroup>
