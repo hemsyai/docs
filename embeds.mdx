@@ -1,6 +1,6 @@
 ---
 title: "Hemsy Embeds"
-description: "Launch Hemsy on your storefront: blank, pre-loaded with products, with a shared look, or inside a guided flow."
+description: "Launch Hemsy on your storefront: blank, pre-loaded with products, with a shared look, inside a guided flow, or with instant generation."
 ---
 
 ## Script Setup
@@ -25,12 +25,13 @@ Any element matching `data-hemsy-selector` becomes a Hemsy launcher. The launch 
 
 ## Script Attributes Reference
 
-| Attribute                 | Required | Example             | Description                                                                                       |
-| ------------------------- | -------- | ------------------- | ------------------------------------------------------------------------------------------------- |
-| `data-hemsy-subdomain`    | true     | `"mystore"`         | Your Hemsy store subdomain.                                                                       |
-| `data-hemsy-selector`     | true     | `".hemsy-launcher"` | CSS selector for elements that launch Hemsy.                                                      |
-| `data-hemsy-anonymous-id` | false    | `"visitor-42"`      | Anonymous visitor ID passed through to Hemsy for analytics and order metadata.                    |
-| `data-hemsy-mode`         | false    | `"cart"`            | Final action mode. Defaults to `"checkout"`; use `"cart"` to send variant data back to your site. |
+| Attribute                 | Required | Example             | Description                                                                                                                                          |
+| ------------------------- | -------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `data-hemsy-subdomain`    | true     | `"mystore"`         | Your Hemsy store subdomain.                                                                                                                          |
+| `data-hemsy-selector`     | true     | `".hemsy-launcher"` | CSS selector for elements that launch Hemsy.                                                                                                         |
+| `data-hemsy-anonymous-id` | false    | `"visitor-42"`      | Anonymous visitor ID passed through to Hemsy for analytics and order metadata.                                                                       |
+| `data-hemsy-mode`         | false    | `"instant"`         | Launch mode. Omit for the default interactive experience; set to `"instant"` for instant generation with a pre-selected model.                       |
+| `data-hemsy-action`       | false    | `"cart"`            | Controls the final CTA behavior: `"checkout"` (default) opens Shopify checkout; `"cart"` sends variant data back to your site. Applies to all modes. |
 
 Note: For event callbacks (`onItemAdded`, `onItemRemoved`, `onProductVariantData`), use `window.HemsyEmbedConfig` instead of data attributes. See the Event Callbacks section below.
 
@@ -38,39 +39,114 @@ Note: For event callbacks (`onItemAdded`, `onItemRemoved`, `onProductVariantData
 
 Attach these to any element matching `data-hemsy-selector`.
 
-| Attribute                         | Example         | Description                                                                                                 |
-| --------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------- |
-| `data-hemsy-share`                | `"<shareId>"`   | Opens a previously shared look by its short ID. Highest priority.                                           |
-| `data-hemsy-auto-product-context` | `"true"`        | Auto-builds a closet payload from the current PDP variant. Falls back to scratch if no variant is detected. |
-| `data-hemsy-closet`               | `"eyJwcm9k..."` | Explicit URL-safe base64 closet payload. Use this for bundles or curated looks.                             |
-| `data-hemsy-flow`                 | `"<flowId>"`    | Adds a guided flow to the launch. Must be on the clicked launcher element.                                  |
+| Attribute                         | Example         | Description                                                                                                                        |
+| --------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `data-hemsy-share`                | `"<shareId>"`   | Opens a previously shared look by its short ID. Highest priority.                                                                  |
+| `data-hemsy-auto-product-context` | `"true"`        | Auto-builds a closet payload from the current PDP variant. Falls back to scratch if no variant is detected.                        |
+| `data-hemsy-closet`               | `"eyJwcm9k..."` | Explicit URL-safe base64 closet payload. Use this for bundles or curated looks.                                                    |
+| `data-hemsy-flow`                 | `"<flowId>"`    | Adds a guided flow to the launch. Must be on the clicked launcher element.                                                         |
+| `data-hemsy-model`                | `"<modelId>"`   | Model UUID for instant mode. Skips model selection and uses this model for generation. Copy the ID from the dashboard Models page. |
 
-## Mode Resolution
+## Launch Resolution
 
 Evaluated per clicked element, in this order:
 
-1. `data-hemsy-share="<shortId>"`: share mode with that shared look.
-2. `data-hemsy-auto-product-context="true"`: closet mode with a synthesized product payload, or scratch if no product variant is detected.
-3. `data-hemsy-closet="<base64>"`: closet mode with that exact payload.
-4. Nothing else: scratch mode.
+1. **Instant** (`data-hemsy-mode="instant"` on the script + `data-hemsy-model` on the element): instant generation with the specified model and closet payload.
+2. `data-hemsy-share="<shortId>"`: share mode with that shared look.
+3. `data-hemsy-auto-product-context="true"`: closet mode with a synthesized product payload, or scratch if no product variant is detected.
+4. `data-hemsy-closet="<base64>"`: closet mode with that exact payload.
+5. Nothing else: scratch mode (open the full interactive experience).
 
 `data-hemsy-flow` composes with any of the above. A flow-only launcher opens scratch mode with the flow applied.
 
-## Final Action Mode
+`data-hemsy-action` is orthogonal to launch resolution and controls only what the final CTA does (checkout or cart handoff).
 
-`data-hemsy-mode` is set on the script tag and controls what happens when the customer taps the final result CTA:
+<Note>
+  **Instant mode and share are not compatible on the same script tag.** When
+  `data-hemsy-mode="instant"` is set on the script, share launchers do not work
+  — the `share` param is not forwarded to the iframe URL. If an element has both
+  `data-hemsy-model` and `data-hemsy-share`, instant wins and share is ignored.
+  Use default script mode for share buttons, or load separate script tags if you
+  need both instant and share launchers on the same page.
+</Note>
+
+## Final Action
+
+`data-hemsy-action` is set on the script tag and controls what happens when the customer taps the final result CTA. It applies to all modes (default and instant).
 
 - `checkout` (default): the CTA says "Go to Checkout" and Hemsy creates or opens a Shopify checkout/cart URL.
 - `cart`: the CTA says "Go to Cart", Hemsy posts `PRODUCT_VARIANT_DATA` to the parent page, calls `window.HemsyEmbedConfig.onProductVariantData(payload)`, and closes the modal.
 
-Use `cart` mode when your storefront owns cart state and should add the returned variants itself.
+Use `cart` when your storefront owns cart state and should add the returned variants itself.
 
 ```html
 <script
   src="https://hemsy.ai/hemsy-embed.js"
   data-hemsy-subdomain="your-store-subdomain"
   data-hemsy-selector=".hemsy-launcher"
-  data-hemsy-mode="cart"
+  data-hemsy-action="cart"
+  defer
+></script>
+```
+
+<Note>
+  `data-hemsy-mode="cart"` and `data-hemsy-mode="checkout"` are deprecated but
+  still supported for backward compatibility. Prefer `data-hemsy-action`
+  instead.
+</Note>
+
+## Instant Mode
+
+Instant mode bypasses model selection and immediately triggers image generation with a specific model and product closet. The customer sees the generation loading state and then the result.
+
+### Setup
+
+```html
+<script
+  src="https://hemsy.ai/hemsy-embed.js"
+  data-hemsy-subdomain="your-store-subdomain"
+  data-hemsy-selector=".hemsy-launcher"
+  data-hemsy-mode="instant"
+  defer
+></script>
+
+<a
+  href="#"
+  class="hemsy-launcher"
+  data-hemsy-model="YOUR_MODEL_ID"
+  data-hemsy-closet="YOUR_URLSAFE_BASE64_CLOSET_PAYLOAD"
+>
+  See it on a model
+</a>
+```
+
+### How It Works
+
+1. Set `data-hemsy-mode="instant"` on the script tag.
+2. Optionally set `data-hemsy-action="cart"` to use cart mode instead of the default checkout.
+3. On each launcher element, set `data-hemsy-model` to the model UUID (copied from the dashboard Models page) and `data-hemsy-closet` to the product payload.
+4. When the customer clicks the launcher, Hemsy opens the modal, loads the model image and products, and immediately starts generating the try-on image.
+5. After generation, the customer sees the result and can proceed to checkout or cart.
+
+### Getting Model IDs
+
+Model IDs are UUIDs assigned to each model image in your store's model library. To find them:
+
+1. Go to your store's **Models** page in the Hemsy dashboard.
+2. Hover over any model image.
+3. Click the copy icon in the bottom-left corner to copy the model ID to your clipboard.
+
+### Instant Mode with Cart Action
+
+To combine instant mode with cart handoff (where your storefront manages cart state):
+
+```html
+<script
+  src="https://hemsy.ai/hemsy-embed.js"
+  data-hemsy-subdomain="your-store-subdomain"
+  data-hemsy-selector=".hemsy-launcher"
+  data-hemsy-mode="instant"
+  data-hemsy-action="cart"
   defer
 ></script>
 ```
@@ -121,6 +197,27 @@ Open a previously shared look directly:
 ```
 
 This is useful for marketing campaigns, email links, or displaying shared looks on your storefront without requiring a page reload.
+
+<Warning>
+  Do not use share launchers on a page where the embed script has
+  `data-hemsy-mode="instant"`. Share requires default script mode. See [Launch
+  Resolution](#launch-resolution) for details.
+</Warning>
+
+### Instant Launcher
+
+Skip model selection and immediately generate with a specific model:
+
+```html
+<a
+  href="#"
+  class="hemsy-launcher"
+  data-hemsy-model="YOUR_MODEL_ID"
+  data-hemsy-closet="YOUR_URLSAFE_BASE64_CLOSET_PAYLOAD"
+>
+  See it on a model
+</a>
+```
 
 ## URL Parameter Auto-Open
 
@@ -215,6 +312,12 @@ HemsyEmbed.open("share", { share: "FreyjHz4" });
 // Into a flow
 HemsyEmbed.open("scratch", { flow: "YOUR_FLOW_ID" });
 
+// Instant mode with model and closet
+HemsyEmbed.open("instant", {
+  model: "YOUR_MODEL_ID",
+  closet: "YOUR_URLSAFE_BASE64_CLOSET_PAYLOAD",
+});
+
 // Close
 HemsyEmbed.close();
 ```
@@ -229,7 +332,7 @@ Listen for events from the Hemsy embed to sync with your cart state:
 window.HemsyEmbedConfig = {
   subdomain: "your-store-subdomain",
   selector: ".hemsy-launcher",
-  mode: "cart",
+  action: "cart",
   onItemAdded: function (item) {
     // item.variantId - Shopify variant ID (string)
     // item.quantity - always 1
@@ -240,7 +343,7 @@ window.HemsyEmbedConfig = {
     console.log("Removed from bag:", item.variantId);
   },
   onProductVariantData: function (payload) {
-    // Fired in cart mode when the final "Go to Cart" button is clicked.
+    // Fired in cart action when the final "Go to Cart" button is clicked.
     // payload.items - Array<{ variantId: string, quantity: number, attributes?: Array<{ key: string, value: string }> }>
     console.log("Send these variants to your cart:", payload.items);
   },
@@ -249,11 +352,11 @@ window.HemsyEmbedConfig = {
 
 ### Available Event Callbacks
 
-| Callback               | Payload                                                                                                         | Description                                  |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| `onItemAdded`          | `{ variantId: string, quantity: number }`                                                                       | Fired when item added to bag                 |
-| `onItemRemoved`        | `{ variantId: string }`                                                                                         | Fired when item removed from bag             |
-| `onProductVariantData` | `{ items: Array<{ variantId: string, quantity: number, attributes?: Array<{ key: string, value: string }> }> }` | Fired in cart mode when final CTA is clicked |
+| Callback               | Payload                                                                                                         | Description                                          |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| `onItemAdded`          | `{ variantId: string, quantity: number }`                                                                       | Fired when item added to bag                         |
+| `onItemRemoved`        | `{ variantId: string }`                                                                                         | Fired when item removed from bag                     |
+| `onProductVariantData` | `{ items: Array<{ variantId: string, quantity: number, attributes?: Array<{ key: string, value: string }> }> }` | Fired when `action: "cart"` and final CTA is clicked |
 
 ### Hydrogen Example
 
@@ -267,7 +370,7 @@ function HemsyEmbedSetup() {
     window.HemsyEmbedConfig = {
       subdomain: "your-store",
       selector: ".hemsy-launcher",
-      mode: "cart",
+      action: "cart",
       onItemAdded: ({ variantId, quantity }) => {
         linesAdd([
           {
@@ -300,8 +403,8 @@ function HemsyEmbedSetup() {
   Event callbacks fire immediately when items are added or removed from the bag
   inside the Hemsy embed. The `variantId` is the numeric Shopify variant ID as a
   string, which you'll need to convert to a GID format for Hydrogen's cart
-  operations. In `cart` mode, `onProductVariantData` fires when the final "Go to
-  Cart" button is clicked.
+  operations. With `action: "cart"`, `onProductVariantData` fires when the final
+  "Go to Cart" button is clicked.
 </Note>
 
 ## End-to-End Example
@@ -311,7 +414,7 @@ function HemsyEmbedSetup() {
   window.HemsyEmbedConfig = {
     subdomain: "your-store-subdomain",
     selector: ".hemsy-launcher",
-    mode: "cart",
+    action: "cart",
     onProductVariantData: function ({ items }) {
       console.log("Add these items to your storefront cart:", items);
     },
@@ -323,7 +426,7 @@ function HemsyEmbedSetup() {
   data-hemsy-subdomain="your-store-subdomain"
   data-hemsy-selector=".hemsy-launcher"
   data-hemsy-anonymous-id="visitor-42"
-  data-hemsy-mode="cart"
+  data-hemsy-action="cart"
   defer
 ></script>
 
@@ -352,6 +455,41 @@ function HemsyEmbedSetup() {
 <button class="hemsy-launcher" data-hemsy-share="FreyjHz4">
   View Shared Look
 </button>
+```
+
+## End-to-End Example (Instant Mode)
+
+```html
+<script>
+  window.HemsyEmbedConfig = {
+    subdomain: "your-store-subdomain",
+    selector: ".hemsy-launcher",
+    mode: "instant",
+    action: "cart",
+    onProductVariantData: function ({ items }) {
+      console.log("Add these items to your storefront cart:", items);
+    },
+  };
+</script>
+
+<script
+  src="https://hemsy.ai/hemsy-embed.js"
+  data-hemsy-subdomain="your-store-subdomain"
+  data-hemsy-selector=".hemsy-launcher"
+  data-hemsy-mode="instant"
+  data-hemsy-action="cart"
+  defer
+></script>
+
+<!-- Instant: skip model selection, generate immediately -->
+<a
+  href="#"
+  class="hemsy-launcher"
+  data-hemsy-model="YOUR_MODEL_ID"
+  data-hemsy-closet="YOUR_URLSAFE_BASE64_CLOSET_PAYLOAD"
+>
+  See it on a model
+</a>
 ```
 
 ## Common Mistake
