@@ -1,0 +1,75 @@
+---
+title: "JavaScript API"
+description: "Open and close Hemsy programmatically with window.HemsyEmbed, and configure the embed with window.HemsyEmbedConfig."
+---
+
+If you'd rather open Hemsy from JavaScript than from launcher attributes — for dynamic elements, custom routing, or your own event handling — use `window.HemsyEmbed`. The embed script must still be loaded on the page.
+
+<Note>
+  The API uses the original mode identifiers: `"scratch"` is Sandbox mode and
+  `"closet"` is Bundle mode.
+</Note>
+
+## Opening
+
+```js
+// Sandbox (blank interactive experience)
+HemsyEmbed.open("scratch");
+
+// Product context, auto-built from the current page
+HemsyEmbed.open({ payload: { autoProductContext: true } });
+
+// Bundle (explicit payload)
+HemsyEmbed.open("closet", { closet: "YOUR_URLSAFE_BASE64_PAYLOAD" });
+
+// Shared look by short ID
+HemsyEmbed.open("share", { share: "FreyjHz4" });
+
+// Sandbox inside a guided flow
+HemsyEmbed.open("scratch", { flow: "YOUR_FLOW_ID" });
+
+// Instant generation with a model and payload
+HemsyEmbed.open("instant", {
+  model: "YOUR_MODEL_ID",
+  closet: "YOUR_URLSAFE_BASE64_PAYLOAD",
+});
+```
+
+<Warning>
+  `HemsyEmbed.open("instant", ...)` only works when the embed is configured
+  with instant mode — `data-hemsy-mode="instant"` on the script tag or
+  `mode: "instant"` on `HemsyEmbedConfig`. Without it, the instant parameters
+  are not forwarded and the modal opens as a plain embed. Conversely, with
+  instant mode set, `HemsyEmbed.open("share", ...)` will not work — see
+  [Launch modes](/embeds/launch-modes#instant-is-page-wide).
+</Warning>
+
+## Closing
+
+```js
+HemsyEmbed.close();
+```
+
+## Configuration with `HemsyEmbedConfig`
+
+`window.HemsyEmbedConfig` is the JavaScript alternative to script-tag data attributes, and the only place to register [event callbacks](/embeds/checkout-vs-cart#event-callbacks). Define it before the embed script loads:
+
+```js
+window.HemsyEmbedConfig = {
+  subdomain: "your-store-subdomain",
+  selector: ".hemsy-launcher",
+  mode: "instant",          // optional; same as data-hemsy-mode
+  action: "cart",           // optional; same as data-hemsy-action
+  anonymousId: "visitor-42", // optional; same as data-hemsy-anonymous-id
+  autoClose: false,          // optional; same as data-hemsy-auto-close
+  onItemAdded: (item) => {},
+  onItemRemoved: (item) => {},
+  onProductVariantData: (payload) => {},
+};
+```
+
+<Note>
+  When the same setting appears both on `HemsyEmbedConfig` and as a script-tag
+  data attribute, the **script attribute wins**. Keep each setting in one place
+  to avoid surprises.
+</Note>

@@ -1,5 +1,5 @@
 ---
-title: "Roles & permissions"
+title: "Roles & Permissions"
 description: "Owner, admin, and viewer access in the Hemsy merchant dashboard."
 ---
 
@@ -39,17 +39,17 @@ Viewers have read-only access to assigned stores.
 
 Permissions apply within each member's **store access scope** (see below).
 
-| Capability | Owner | Admin | Viewer |
-| ---------- | ----- | ----- | ------ |
-| View dashboards and analytics | Yes | Yes | Yes |
-| View store settings | Yes | Yes | Yes |
-| Edit store configuration | Yes | Yes | No |
-| Manage flows | Yes | Yes | No |
-| Manage integrations | Yes | Yes | No |
-| Invite and remove members | Yes | Yes¹ | No |
-| Change member roles | Yes | No | No |
-| Purchase credits / manage billing | Yes | No | No |
-| Delete stores or organization | Yes | No | No |
+| Capability                        | Owner | Admin | Viewer |
+| --------------------------------- | ----- | ----- | ------ |
+| View dashboards and analytics     | Yes   | Yes   | Yes    |
+| View store settings               | Yes   | Yes   | Yes    |
+| Edit store configuration          | Yes   | Yes   | No     |
+| Manage flows                      | Yes   | Yes   | No     |
+| Manage integrations               | Yes   | Yes   | No     |
+| Invite and remove members         | Yes   | Yes¹  | No     |
+| Change member roles               | Yes   | No    | No     |
+| Purchase credits / manage billing | Yes   | No    | No     |
+| Delete stores or organization     | Yes   | No    | No     |
 
 ¹ Admins can invite and remove non-owner members. Only owners can invite other owners or change owner roles.
 
@@ -67,8 +67,8 @@ If a member has no access to a store, that store is hidden from their dashboard 
 Hemsy does not show disabled actions as grayed-out controls in every case. When a member lacks permission:
 
 - **No store access** — the store does not appear in navigation. Direct links to that store return a **404 / page not found** response.
-- **View-only user attempts a change** — the action is blocked with: *"You have view-only access..."*
-- **Admin attempts billing or delete** — the action is blocked with: *"Only organization owners can..."*
+- **View-only user attempts a change** — the action is blocked with: _"You have view-only access..."_
+- **Admin attempts billing or delete** — the action is blocked with: _"Only organization owners can..."_
 
 ## Team management
 
@@ -79,8 +79,8 @@ Manage members from **Organization settings** in the Hemsy dashboard.
 - **Viewers** cannot invite or manage team members.
 
 <Note>
-  Every organization must have at least one owner at all times. You cannot remove
-  the last owner from an organization.
+  Every organization must have at least one owner at all times. You cannot
+  remove the last owner from an organization.
 </Note>
 
 ## FAQ
@@ -91,14 +91,14 @@ Manage members from **Organization settings** in the Hemsy dashboard.
     must remain on the organization at all times.
   </Accordion>
 
-  <Accordion title="Can admins purchase credits?">
-    No. Only organization owners can purchase credits and manage billing.
-  </Accordion>
+<Accordion title="Can admins purchase credits?">
+  No. Only organization owners can purchase credits and manage billing.
+</Accordion>
 
-  <Accordion title="Can a viewer see analytics for stores they are assigned to?">
-    Yes. Viewers can view dashboards and analytics for their assigned stores.
-    They cannot change settings or invite team members.
-  </Accordion>
+<Accordion title="Can a viewer see analytics for stores they are assigned to?">
+  Yes. Viewers can view dashboards and analytics for their assigned stores. They
+  cannot change settings or invite team members.
+</Accordion>
 
   <Accordion title="What if I need someone to manage integrations but not billing?">
     Assign the **admin** role with access to the relevant stores. Admins can

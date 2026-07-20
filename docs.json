@@ -12,7 +12,19 @@
     "groups": [
       {
         "group": "Guides",
-        "pages": ["embeds", "deep-links", "segment"]
+        "pages": [
+          {
+            "group": "Embeds",
+            "pages": [
+              "embeds/overview",
+              "embeds/launch-modes",
+              "embeds/checkout-vs-cart",
+              "embeds/javascript-api"
+            ]
+          },
+          "deep-links",
+          "segment"
+        ]
       },
       {
         "group": "Dashboard",
@@ -25,6 +37,12 @@
       }
     ]
   },
+  "redirects": [
+    {
+      "source": "/embeds",
+      "destination": "/embeds/overview"
+    }
+  ],
   "api": {
     "playground": {
       "mode": "show"

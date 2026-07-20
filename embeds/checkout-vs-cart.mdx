@@ -1,0 +1,121 @@
+---
+title: "Checkout vs Cart Resolution"
+description: "Choose what the final CTA does: open Shopify checkout, or hand variant data back to your storefront's own cart."
+---
+
+When a shopper finishes a try-on, the result screen shows one final CTA. `data-hemsy-action` on the script tag decides what it does. It applies to every launch mode, including Instant.
+
+| Action               | CTA label        | What happens                                                                                                                              |
+| -------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `checkout` (default) | "Go to Checkout" | Hemsy creates or opens a Shopify checkout/cart URL directly.                                                                              |
+| `cart`               | "Go to Cart"     | Hemsy posts the selected variants back to your page, calls `window.HemsyEmbedConfig.onProductVariantData(payload)`, and closes the modal. |
+
+Use `cart` when your storefront owns cart state and should add the returned variants itself — headless storefronts, Hydrogen, or any site with a custom cart drawer.
+
+```html
+<script
+  src="https://hemsy.ai/hemsy-embed.js"
+  data-hemsy-subdomain="your-store-subdomain"
+  data-hemsy-selector=".hemsy-launcher"
+  data-hemsy-action="cart"
+  defer
+></script>
+```
+
+<Note>
+  The legacy `data-hemsy-mode="cart"` still maps to the cart action for backward
+  compatibility, but prefer `data-hemsy-action` — `data-hemsy-mode` should be
+  reserved for `"instant"`. (`data-hemsy-mode="checkout"` has no effect;
+  checkout is simply the default action.)
+</Note>
+
+## Event callbacks
+
+Callbacks are configured on `window.HemsyEmbedConfig` (not data attributes). Define it before the embed script loads:
+
+```html
+<script>
+  window.HemsyEmbedConfig = {
+    subdomain: "your-store-subdomain",
+    selector: ".hemsy-launcher",
+    action: "cart",
+    onItemAdded: function (item) {
+      // item.variantId - Shopify variant ID (string)
+      // item.quantity - always 1
+      console.log("Added to bag:", item.variantId);
+    },
+    onItemRemoved: function (item) {
+      console.log("Removed from bag:", item.variantId);
+    },
+    onProductVariantData: function (payload) {
+      // Fired in cart action when the final "Go to Cart" button is clicked.
+      console.log("Send these variants to your cart:", payload.items);
+    },
+  };
+</script>
+
+<script
+  src="https://hemsy.ai/hemsy-embed.js"
+  data-hemsy-subdomain="your-store-subdomain"
+  data-hemsy-selector=".hemsy-launcher"
+  data-hemsy-action="cart"
+  defer
+></script>
+```
+
+| Callback               | Payload                                                                                                         | Fires when                                    |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| `onItemAdded`          | `{ variantId: string, quantity: number }`                                                                       | An item is added to the bag inside Hemsy      |
+| `onItemRemoved`        | `{ variantId: string }`                                                                                         | An item is removed from the bag inside Hemsy  |
+| `onProductVariantData` | `{ items: Array<{ variantId: string, quantity: number, attributes?: Array<{ key: string, value: string }> }> }` | `action: "cart"` and the final CTA is clicked |
+
+`onItemAdded` and `onItemRemoved` fire live as the shopper edits their bag, regardless of action. `onProductVariantData` is the cart handoff itself: the `items` array includes any line-item attributes from the original payload (bundle keys and so on), so pass them through to your cart.
+
+### Keeping the modal open
+
+By default, Hemsy closes the modal after the cart handoff. Set `data-hemsy-auto-close="false"` on the script tag (or `autoClose: false` on `HemsyEmbedConfig`) to keep it open — for example if you show your cart drawer next to the modal.
+
+## Hydrogen example
+
+```jsx
+import { useCart } from "@shopify/hydrogen";
+
+function HemsyEmbedSetup() {
+  const { linesAdd, linesRemove, lines, cartOpen } = useCart();
+
+  useEffect(() => {
+    window.HemsyEmbedConfig = {
+      subdomain: "your-store",
+      selector: ".hemsy-launcher",
+      action: "cart",
+      onItemAdded: ({ variantId, quantity }) => {
+        linesAdd([
+          {
+            merchandiseId: `gid://shopify/ProductVariant/${variantId}`,
+            quantity,
+          },
+        ]);
+      },
+      onItemRemoved: ({ variantId }) => {
+        const lineToRemove = lines?.find(
+          (line) =>
+            line.merchandise.id === `gid://shopify/ProductVariant/${variantId}`,
+        );
+        if (lineToRemove) {
+          linesRemove([lineToRemove.id]);
+        }
+      },
+      onProductVariantData: () => {
+        cartOpen();
+      },
+    };
+  }, [linesAdd, linesRemove, lines, cartOpen]);
+
+  return null;
+}
+```
+
+<Note>
+  `variantId` is the numeric Shopify variant ID as a string — convert it to GID
+  format (`gid://shopify/ProductVariant/...`) for Hydrogen's cart operations.
+</Note>

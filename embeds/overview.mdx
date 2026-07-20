@@ -1,0 +1,83 @@
+---
+title: "Overview"
+description: "Add the Hemsy embed to your storefront: one script tag, launcher elements, and a choice of what happens at checkout."
+---
+
+Hemsy Embeds let shoppers open the full Hemsy try-on experience in a modal on your own storefront. One script tag turns any element on your page into a launcher.
+
+There are only three things to decide:
+
+| Knob | Where it's set | What it controls |
+| --- | --- | --- |
+| **Script setup** | The `<script>` tag (once per page) | Your store subdomain, which elements are launchers, and page-wide behavior |
+| **Launch mode** | Attributes on each launcher element | What that click opens: Sandbox, product context, Bundle, Share, or Instant |
+| **Final action** | `data-hemsy-action` on the script tag | What the final CTA does: Shopify checkout (default) or a cart handoff to your site |
+
+Everything else in these docs is payload detail or recipes for those three knobs.
+
+## Install
+
+```html
+<script
+  src="https://hemsy.ai/hemsy-embed.js"
+  data-hemsy-subdomain="your-store-subdomain"
+  data-hemsy-selector=".hemsy-launcher"
+  defer
+></script>
+
+<a class="hemsy-launcher" href="#">Design a look</a>
+```
+
+Any element matching `data-hemsy-selector` becomes a launcher. With no extra attributes, clicking it opens **Sandbox mode** — the full interactive experience, starting blank.
+
+Use a shared class selector like `.hemsy-launcher` when multiple elements should open Hemsy. Avoid reusing the same `id` on multiple elements.
+
+<Note>
+  Launchers are bound when the script loads. Elements added to the page later
+  (for example by client-side rendering after load) will not automatically
+  become launchers — use the [JavaScript API](/embeds/javascript-api) for
+  dynamic elements.
+</Note>
+
+## Script attributes
+
+| Attribute | Required | Example | Description |
+| --- | --- | --- | --- |
+| `data-hemsy-subdomain` | Yes | `"mystore"` | Your Hemsy store subdomain. For `mystore.hemsy.ai`, use `"mystore"`. |
+| `data-hemsy-selector` | Yes | `".hemsy-launcher"` | CSS selector for elements that launch Hemsy. |
+| `data-hemsy-mode` | No | `"instant"` | Omit for the default interactive experience. Set to `"instant"` to skip model selection and generate immediately — see [Instant](/embeds/launch-modes#instant). |
+| `data-hemsy-action` | No | `"cart"` | Final CTA behavior: `"checkout"` (default) opens Shopify checkout; `"cart"` hands variant data back to your site. See [Checkout vs Cart](/embeds/checkout-vs-cart). |
+| `data-hemsy-anonymous-id` | No | `"visitor-42"` | Anonymous visitor ID passed through to Hemsy for analytics and order metadata. See [Segment](/segment). |
+
+Event callbacks (`onItemAdded`, `onItemRemoved`, `onProductVariantData`) are configured on `window.HemsyEmbedConfig`, not as data attributes — see [Checkout vs Cart](/embeds/checkout-vs-cart#event-callbacks).
+
+## Rules worth knowing up front
+
+<Warning>
+  **Instant and Share cannot coexist on the same script tag.** When the script
+  has `data-hemsy-mode="instant"`, share launchers, `?share=` links, and
+  programmatic share opens all stop working for that embed instance — the share
+  parameter is never forwarded. Use the default script mode for share buttons.
+</Warning>
+
+- Prefer `data-hemsy-action` for checkout vs cart. The legacy `data-hemsy-mode="cart"` still works for backward compatibility, but `data-hemsy-mode` should be reserved for `"instant"`.
+- `data-hemsy-trigger` is not a supported attribute. If you see it in old snippets, replace it with a `data-hemsy-selector` match plus the appropriate launcher attribute.
+
+## Where to go next
+
+<CardGroup cols="2">
+  <Card title="Launch modes" icon="rocket" href="/embeds/launch-modes">
+    Sandbox, product context, Bundle, Share, Flow, and Instant — and which one
+    wins when a launcher has multiple attributes.
+  </Card>
+  <Card title="Checkout vs Cart" icon="cart-shopping" href="/embeds/checkout-vs-cart">
+    Decide what the final CTA does, and sync Hemsy with your own cart state.
+  </Card>
+  <Card title="JavaScript API" icon="code" href="/embeds/javascript-api">
+    Open and close Hemsy programmatically with `window.HemsyEmbed`.
+  </Card>
+  <Card title="Deep Links" icon="link" href="/deep-links">
+    Payload schemas, bundle attributes, and URL encoding shared by embeds and
+    hosted links.
+  </Card>
+</CardGroup>
