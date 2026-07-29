@@ -101,8 +101,8 @@
       "linkedin": "https://linkedin.com/company/tryhemsy"
     }
   },
-  "modeToggle": {
+  "appearance": {
     "default": "light",
-    "isHidden": true
+    "strict": true
   }
 }
