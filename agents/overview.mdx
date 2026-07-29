@@ -1,0 +1,55 @@
+---
+title: "Overview"
+description: "The Visualize API renders any product photorealistically into any scene photo, built for agents, paid per call with prepaid credits."
+---
+
+The Visualize API does one job: **product images + a scene photo in, a photoreal localized edit out.**
+
+This is not generic image generation. Hemsy edits only the product slots in the user's real photo: room/person, camera, and lighting stay; product references (and merchant color/texture swatches when available) lock silhouette, material, and colorway. That is why it beats "ask the model to invent a bedroom with a navy duvet" for in-space decisions.
+
+It is built for AI agents and the tools that power them. A shopping agent recommends a duvet cover; your user wants to see it on their bed. One `visualize` call returns the render: no catalog integration, no merchant onboarding, no permission needed from anyone.
+
+```text
+Input:   any product image(s) + any scene image
+Output:  a photorealistic render
+Payment: prepaid credits, 1 credit per successful render
+```
+
+## Two ways to call it
+
+| Surface | For | Endpoint |
+| --- | --- | --- |
+| [MCP](/agents/mcp) | MCP-native agents (Cursor, Claude, ChatGPT, custom) | `https://api.hemsy.ai/mcp` |
+| [REST](/agents/rest-api) | Anything that can make an HTTP request | `POST https://api.hemsy.ai/visualize` |
+
+Both surfaces expose the same single tool with the same authentication: a developer API key from [developers.hemsy.ai](https://developers.hemsy.ai).
+
+## Merchant fidelity upgrade
+
+If a product you pass belongs to a Hemsy merchant, the render automatically upgrades to that merchant's full catalog fidelity: variant reference imagery, color swatches, and placement rules the merchant configured for their own storefront try-on.
+
+You don't need to do anything to get this: pass the product's page URL (`productUrl`) and the upgrade happens automatically when the product resolves to a Hemsy store. The response tells you which products rendered at `merchant` fidelity vs `generic`.
+
+<Note>
+  This is **not** the merchant embed/try-on API. Merchants embedding try-on on
+  their own storefront should use the [Merchant Try On API](/api-reference/merchant-try-on) and Embeds.
+  The Visualize API is developer-pays: your credits, any product, any scene.
+</Note>
+
+## Pricing
+
+1 credit = 1 successful render, regardless of how many products are composed into the scene. Failed renders are not charged. Buy prepaid credit packs at [developers.hemsy.ai](https://developers.hemsy.ai). No subscription.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Authentication" icon="key" href="/agents/authentication">
+    Create an account, buy credits, and mint your API key.
+  </Card>
+  <Card title="Connect over MCP" icon="plug" href="/agents/mcp">
+    Add the server URL to Cursor, Claude, or any MCP client.
+  </Card>
+  <Card title="REST API" icon="code" href="/agents/rest-api">
+    Call POST /visualize from anything that speaks HTTP.
+  </Card>
+</CardGroup>

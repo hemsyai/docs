@@ -10,7 +10,7 @@ When a shopper finishes a try-on, the result screen shows one final CTA. `data-h
 | `checkout` (default) | "Go to Checkout" | Hemsy creates or opens a Shopify checkout/cart URL directly.                                                                              |
 | `cart`               | "Go to Cart"     | Hemsy posts the selected variants back to your page, calls `window.HemsyEmbedConfig.onProductVariantData(payload)`, and closes the modal. |
 
-Use `cart` when your storefront owns cart state and should add the returned variants itself — headless storefronts, Hydrogen, or any site with a custom cart drawer.
+Use `cart` when your storefront owns cart state and should add the returned variants itself: headless storefronts, Hydrogen, or any site with a custom cart drawer.
 
 ```html
 <script
@@ -24,7 +24,7 @@ Use `cart` when your storefront owns cart state and should add the returned vari
 
 <Note>
   The legacy `data-hemsy-mode="cart"` still maps to the cart action for backward
-  compatibility, but prefer `data-hemsy-action` — `data-hemsy-mode` should be
+  compatibility, but prefer `data-hemsy-action`: `data-hemsy-mode` should be
   reserved for `"instant"`. (`data-hemsy-mode="checkout"` has no effect;
   checkout is simply the default action.)
 </Note>
@@ -73,7 +73,7 @@ Callbacks are configured on `window.HemsyEmbedConfig` (not data attributes). Def
 
 ### Keeping the modal open
 
-By default, Hemsy closes the modal after the cart handoff. Set `data-hemsy-auto-close="false"` on the script tag (or `autoClose: false` on `HemsyEmbedConfig`) to keep it open — for example if you show your cart drawer next to the modal.
+By default, Hemsy closes the modal after the cart handoff. Set `data-hemsy-auto-close="false"` on the script tag (or `autoClose: false` on `HemsyEmbedConfig`) to keep it open (for example if you show your cart drawer next to the modal).
 
 ## Hydrogen example
 
@@ -116,6 +116,6 @@ function HemsyEmbedSetup() {
 ```
 
 <Note>
-  `variantId` is the numeric Shopify variant ID as a string — convert it to GID
+  `variantId` is the numeric Shopify variant ID as a string. Convert it to GID
   format (`gid://shopify/ProductVariant/...`) for Hydrogen's cart operations.
 </Note>

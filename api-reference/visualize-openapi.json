@@ -1,0 +1,221 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Hemsy Visualize API",
+    "description": "Render any product photorealistically into any scene photo. Developer-pays: prepaid credits, 1 credit per successful render.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Hemsy Support",
+      "url": "https://developers.hemsy.ai",
+      "email": "support@hemsy.ai"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.hemsy.ai"
+    }
+  ],
+  "paths": {
+    "/visualize": {
+      "post": {
+        "operationId": "visualize",
+        "summary": "Visualize",
+        "description": "Render one or more products into a scene photo. Requires a developer API key from developers.hemsy.ai. Products that belong to a Hemsy merchant automatically upgrade to merchant fidelity (catalog reference assets). Renders take 40-160 seconds; set client timeouts to at least 300 seconds.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["sceneImage", "products"],
+                "properties": {
+                  "sceneImage": {
+                    "type": "string",
+                    "description": "Scene photo to render into: https URL or data URL (room, person, or space). Inline data URLs are capped at 8 MB."
+                  },
+                  "products": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 6,
+                    "description": "Products to compose into the scene. Pass only the item(s) the user picked.",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "title": {
+                          "type": "string",
+                          "description": "Product title."
+                        },
+                        "category": {
+                          "type": "string",
+                          "description": "Product category, e.g. \"bedding\", \"sofa\", \"tops\"."
+                        },
+                        "images": {
+                          "type": "array",
+                          "items": { "type": "string", "format": "uri" },
+                          "maxItems": 4,
+                          "description": "Product image URLs (https). Required unless productUrl resolves to a Hemsy merchant product."
+                        },
+                        "productUrl": {
+                          "type": "string",
+                          "format": "uri",
+                          "description": "Product page (PDP) URL. When it belongs to a Hemsy merchant, the render automatically upgrades to merchant fidelity."
+                        },
+                        "productId": {
+                          "type": "string",
+                          "description": "Shopify product id (optional; improves merchant asset matching)."
+                        },
+                        "variantId": {
+                          "type": "string",
+                          "description": "Shopify variant id (optional; best merchant asset match)."
+                        },
+                        "color": {
+                          "type": "string",
+                          "description": "Colorway name, e.g. \"sand\"."
+                        },
+                        "tags": {
+                          "type": "array",
+                          "items": { "type": "string" },
+                          "description": "Product tags."
+                        }
+                      }
+                    }
+                  },
+                  "aspect": {
+                    "type": "string",
+                    "enum": ["auto"],
+                    "description": "Output aspect. Only \"auto\" is supported: output matches the scene image."
+                  }
+                }
+              },
+              "examples": {
+                "singleProduct": {
+                  "summary": "One product from a PDP URL",
+                  "value": {
+                    "sceneImage": "https://example.com/my-bedroom.jpg",
+                    "products": [
+                      {
+                        "title": "Linen Duvet Cover",
+                        "category": "bedding",
+                        "productUrl": "https://brand.com/products/linen-duvet",
+                        "images": ["https://brand.com/cdn/duvet-front.jpg"]
+                      }
+                    ]
+                  }
+                },
+                "bareImages": {
+                  "summary": "Bare images (no merchant match)",
+                  "value": {
+                    "sceneImage": "https://example.com/living-room.jpg",
+                    "products": [
+                      {
+                        "title": "Accent Chair",
+                        "images": ["https://cdn.example.com/chair.jpg"]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful render",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "image": {
+                      "type": "string",
+                      "description": "The rendered image (data URL)."
+                    },
+                    "products": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "index": { "type": "integer" },
+                          "fidelity": {
+                            "type": "string",
+                            "enum": ["generic", "merchant"],
+                            "description": "\"merchant\" when the product matched a Hemsy merchant and rendered with catalog assets."
+                          },
+                          "storeSlug": {
+                            "type": "string",
+                            "description": "Echoed when a merchant matched. Reusable in follow-up calls."
+                          }
+                        }
+                      }
+                    },
+                    "usage": {
+                      "type": "object",
+                      "properties": {
+                        "credits": { "type": "integer" },
+                        "balance": { "type": "integer" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, invalid, or revoked API key",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "402": {
+            "description": "Insufficient credits",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string" },
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "remaining_credits": { "type": "integer" },
+          "developers_url": { "type": "string" }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Developer API key from developers.hemsy.ai (hemsy_...)"
+      }
+    }
+  }
+}

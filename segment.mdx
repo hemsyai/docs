@@ -108,8 +108,8 @@ Segment also receives `anonymousId` and an ISO `timestamp`.
 
 | Segment event             | When it fires                                                                           | Event properties |
 | ------------------------- | --------------------------------------------------------------------------------------- | ---------------- |
-| **Hemsy Session Started** | Once per browser tab session when the try-on experience loads and analytics bootstraps. | —                |
-| **Hemsy Session Engaged** | Once per session, 10 seconds after load (shopper remained in the experience).           | —                |
+| **Hemsy Session Started** | Once per browser tab session when the try-on experience loads and analytics bootstraps. | -                |
+| **Hemsy Session Engaged** | Once per session, 10 seconds after load (shopper remained in the experience).           | -                |
 
 ### Try-on funnel
 
@@ -117,14 +117,14 @@ Segment also receives `anonymousId` and an ISO `timestamp`.
 | -------------------------- | ------------------------------------------------------------- | -------------------------------------------------------- |
 | **Hemsy Try On Started**   | Shopper starts try-on generation (photo + at least one item). | `selectedItemCount`                                      |
 | **Hemsy Try On Completed** | Try-on succeeds and the result screen is shown.               | `selectedItemCount`                                      |
-| **Hemsy Try On Failed**    | Try-on fails or returns without a generated image.            | `reason` — e.g. `no_product_images`, `generation_failed` |
+| **Hemsy Try On Failed**    | Try-on fails or returns without a generated image.            | `reason`: e.g. `no_product_images`, `generation_failed` |
 
 ### Look building
 
 | Segment event                  | When it fires                                 | Event properties |
 | ------------------------------ | --------------------------------------------- | ---------------- |
 | **Hemsy Added Item to Look**   | Shopper adds a product variant to their look. | `productTitle`   |
-| **Hemsy User Photo Uploaded**  | Shopper uploads a photo from their device.    | —                |
+| **Hemsy User Photo Uploaded**  | Shopper uploads a photo from their device.    | -                |
 | **Hemsy Model Photo Selected** | Shopper picks a photo from the model library. | `model_id`       |
 
 ### Guided flows
@@ -144,14 +144,14 @@ In free-browse mode (no active flow):
 | Segment event              | When it fires                                | Event properties                              |
 | -------------------------- | -------------------------------------------- | --------------------------------------------- |
 | **Hemsy Filter Selected**  | Shopper selects a category in Filter & Sort. | `filter_name`, `filter_scope`                 |
-| **Hemsy Sort Selected**    | Shopper changes sort (not "Featured").       | `sort_name` — `price-low`, `price-high`, etc. |
+| **Hemsy Sort Selected**    | Shopper changes sort (not "Featured").       | `sort_name`: `price-low`, `price-high`, etc. |
 | **Hemsy Search Submitted** | Shopper submits a catalog search (Enter).    | `query`, `result_count`                       |
 
 ### Result screen
 
 | Segment event              | When it fires                                                 | Event properties                                                                 |
 | -------------------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| **Hemsy Try On Edited**    | Shopper edits the look from the result screen.                | `action` — `edit`, `swap`, or `remove`                                           |
+| **Hemsy Try On Edited**    | Shopper edits the look from the result screen.                | `action`: `edit`, `swap`, or `remove`                                           |
 | **Hemsy Checkout Clicked** | Shopper taps checkout (or cart handoff in embed `cart` mode). | `selectedItemCount`, `hasStorefrontToken`, `fromSharedLook`, `sharedLookShortId` |
 | **Hemsy Look Shared**      | Shopper shares the result.                                    | See [Hemsy Look Shared](#hemsy-look-shared) below.                               |
 
@@ -170,12 +170,12 @@ These answer different questions:
 
 | Property          | What it tells you                                                                                                                                                                                                                                                      |
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `usedNativeShare` | **How** the link was surfaced — `true` if the browser native share sheet was used (`navigator.share` with the URL, common on mobile), `false` if Hemsy fell back to copying the link to the clipboard (typical on desktop when Web Share API is unavailable or fails). |
-| `shareUrl`        | **What** link was shared — the URL recipients can open (for example `https://yourstore.com/?share=FreyjHz4` when redirecting to the store embed, or your hosted `https://{subdomain}.hemsy.ai/?share=…` URL).                                                          |
+| `usedNativeShare` | **How** the link was surfaced: `true` if the browser native share sheet was used (`navigator.share` with the URL, common on mobile), `false` if Hemsy fell back to copying the link to the clipboard (typical on desktop when Web Share API is unavailable or fails). |
+| `shareUrl`        | **What** link was shared: the URL recipients can open (for example `https://yourstore.com/?share=FreyjHz4` when redirecting to the store embed, or your hosted `https://{subdomain}.hemsy.ai/?share=…` URL).                                                          |
 
 Hemsy **always tries** the native share sheet first when `navigator.share` is available and the share completes without cancellation. If that is not available or fails (other than the user dismissing the sheet), Hemsy copies `shareUrl` to the clipboard and sets `usedNativeShare` to `false`. Cancelling the native sheet does **not** fire **Hemsy Look Shared**.
 
-`share_image` does not include `usedNativeShare` or `shareUrl`. That path uses the native share sheet with an image file when supported, otherwise a download — it is separate from the share-link pipeline in `createShareHandler`.
+`share_image` does not include `usedNativeShare` or `shareUrl`. That path uses the native share sheet with an image file when supported, otherwise a download. It is separate from the share-link pipeline in `createShareHandler`.
 
 ### Sharing
 
@@ -224,5 +224,5 @@ If events are missing:
 
 ## Related docs
 
-- [Hemsy Embeds](/embeds/overview) — embedded launch modes, `data-hemsy-anonymous-id`, cart vs checkout
-- Hemsy dashboard **Home** — aggregated KPIs and funnels (no Segment required)
+- [Hemsy Embeds](/embeds/overview): embedded launch modes, `data-hemsy-anonymous-id`, cart vs checkout
+- Hemsy dashboard **Home**: aggregated KPIs and funnels (no Segment required)

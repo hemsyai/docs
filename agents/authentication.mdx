@@ -1,0 +1,53 @@
+---
+title: "Authentication"
+description: "Create a developer account, buy prepaid credits, and authenticate with a Bearer API key."
+---
+
+Every `visualize` call, MCP or REST, requires a developer API key with a positive credit balance. There is no unauthenticated or free tier: requests without a valid key return `401`, and requests with an empty balance return `402`.
+
+## 1. Create an account
+
+Sign up at [developers.hemsy.ai](https://developers.hemsy.ai). If you already have a Hemsy merchant dashboard login, sign in with the same email. Your developer account and its credit balance are separate from any store's billing.
+
+## 2. Buy credits
+
+Credits are prepaid. No subscription. Go to **Credits**, pick a pack, and check out with Stripe. 1 credit is consumed per successful render; failed renders are not charged.
+
+## 3. Create an API key
+
+Go to **API keys** and create a key. The full key (`hemsy_…`) is shown **once**: only a hash is stored, so copy it immediately. You can revoke and re-issue keys at any time.
+
+## 4. Send it as a Bearer token
+
+Pass the key in the `Authorization` header on every request:
+
+```bash
+Authorization: Bearer hemsy_4f3c9a...
+```
+
+This is the same header for the MCP endpoint and the REST endpoint.
+
+## Error responses
+
+| Status | Meaning | Fix |
+| --- | --- | --- |
+| `401` | Missing, invalid, or revoked key | Create or check your key at [developers.hemsy.ai](https://developers.hemsy.ai) |
+| `402` | Insufficient credits | Buy a credit pack |
+| `429` | Rate limit exceeded | Slow down and retry |
+
+Error bodies include a `developers_url` pointer so agents can surface the top-up link to their users:
+
+```json
+{
+  "error": "Insufficient credits",
+  "message": "Buy credits at https://developers.hemsy.ai",
+  "remaining_credits": 0,
+  "developers_url": "https://developers.hemsy.ai"
+}
+```
+
+<Warning>
+  Treat API keys as secrets. Don't ship them in client-side code. Proxy
+  calls through your backend, or scope one key per agent deployment so you
+  can revoke it independently.
+</Warning>

@@ -1,0 +1,71 @@
+---
+title: "REST API"
+description: "POST /visualize: the same render as the MCP tool, callable from anything that speaks HTTP."
+---
+
+If your agent or backend doesn't use MCP, call the plain HTTP endpoint. It shares the exact same handler, authentication, and billing as the MCP tool.
+
+```text
+POST https://api.hemsy.ai/visualize
+Authorization: Bearer hemsy_...
+Content-Type: application/json
+```
+
+## Request
+
+```bash
+curl -X POST https://api.hemsy.ai/visualize \
+  -H "Authorization: Bearer hemsy_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "sceneImage": "https://example.com/my-bedroom.jpg",
+    "products": [{
+      "title": "Linen Duvet Cover",
+      "category": "bedding",
+      "productUrl": "https://brand.com/products/linen-duvet",
+      "images": ["https://brand.com/cdn/duvet-front.jpg"]
+    }]
+  }'
+```
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `sceneImage` | string (required) | https URL or data URL of the scene (room, person, space) |
+| `products[]` | array (required, 1–6) | Products to compose into the scene |
+| `products[].images` | string[] | Product image URLs (https). Required unless `productUrl` resolves to a Hemsy merchant product |
+| `products[].productUrl` | string | Product page URL. Unlocks merchant fidelity when it matches a Hemsy store |
+| `products[].title`, `category`, `color`, `tags` | string(s) | Optional descriptors that improve render quality |
+| `products[].productId`, `variantId` | string | Optional Shopify ids; improve merchant asset matching |
+| `aspect` | `"auto"` | Output matches the scene image aspect |
+
+Prefer https image URLs over base64 data URLs. Inline images are capped at 8&nbsp;MB each.
+
+## Response
+
+```json
+{
+  "image": "data:image/png;base64,...",
+  "products": [
+    { "index": 0, "fidelity": "merchant", "storeSlug": "acme-home" }
+  ],
+  "usage": { "credits": 1, "balance": 249 }
+}
+```
+
+`products[].fidelity` is `merchant` when the item matched a Hemsy merchant and rendered with their catalog assets, otherwise `generic`.
+
+## Errors
+
+| Status | Body `code` | Meaning |
+| --- | --- | --- |
+| `400` | - | Invalid input (missing scene, no renderable products, too many images) |
+| `401` | - | Missing, invalid, or revoked API key |
+| `402` | `INSUFFICIENT_CREDITS` | Balance is empty. Top up at [developers.hemsy.ai](https://developers.hemsy.ai) |
+| `429` | - | Rate limit exceeded |
+| `502` / `503` | `MODEL_ERROR` / `MODEL_UNAVAILABLE` | Render providers failed. Retry; you were not charged |
+
+## Timeouts
+
+Renders take 40–160 seconds; set your HTTP client timeout to at least 300 seconds. Credits are only consumed on success.
+
+See also the interactive [API playground](/api-reference/agent-try-on) for the schema, or [Authentication](/agents/authentication) for key setup.

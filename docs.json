@@ -11,7 +11,7 @@
   "navigation": {
     "groups": [
       {
-        "group": "Guides",
+        "group": "Merchants",
         "pages": [
           {
             "group": "Embeds",
@@ -23,17 +23,25 @@
             ]
           },
           "deep-links",
-          "segment"
+          {
+            "group": "Integrations",
+            "pages": ["segment"]
+          },
+          "permissions"
         ]
       },
       {
-        "group": "Dashboard",
-        "pages": ["permissions"]
+        "group": "Agents",
+        "pages": [
+          "agents/overview",
+          "agents/authentication",
+          "agents/mcp",
+          "agents/rest-api"
+        ]
       },
       {
         "group": "API Reference",
-        "openapi": "api-reference/openapi.json",
-        "pages": ["POST /api/try-on"]
+        "pages": ["api-reference/merchant-try-on", "api-reference/agent-try-on"]
       }
     ]
   },
@@ -41,6 +49,10 @@
     {
       "source": "/embeds",
       "destination": "/embeds/overview"
+    },
+    {
+      "source": "/api-reference/try-on",
+      "destination": "/api-reference/merchant-try-on"
     }
   ],
   "api": {
@@ -60,6 +72,10 @@
       {
         "label": "Support",
         "href": "mailto:support@hemsy.ai"
+      },
+      {
+        "label": "Developers",
+        "href": "https://developers.hemsy.ai"
       }
     ],
     "primary": {

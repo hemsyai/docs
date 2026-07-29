@@ -3,7 +3,7 @@ title: "JavaScript API"
 description: "Open and close Hemsy programmatically with window.HemsyEmbed, and configure the embed with window.HemsyEmbedConfig."
 ---
 
-If you'd rather open Hemsy from JavaScript than from launcher attributes — for dynamic elements, custom routing, or your own event handling — use `window.HemsyEmbed`. The embed script must still be loaded on the page.
+If you'd rather open Hemsy from JavaScript than from launcher attributes (for dynamic elements, custom routing, or your own event handling), use `window.HemsyEmbed`. The embed script must still be loaded on the page.
 
 <Note>
   The API uses the original mode identifiers: `"scratch"` is Sandbox mode and
@@ -25,8 +25,8 @@ HemsyEmbed.open("closet", { closet: "YOUR_URLSAFE_BASE64_PAYLOAD" });
 // Shared look by short ID
 HemsyEmbed.open("share", { share: "FreyjHz4" });
 
-// Sandbox inside a guided flow
-HemsyEmbed.open("scratch", { flow: "YOUR_FLOW_ID" });
+// Guided flow with an empty look (same as a flow-only launcher)
+HemsyEmbed.open({ payload: { flow: "YOUR_FLOW_ID" } });
 
 // Instant generation with a model and payload
 HemsyEmbed.open("instant", {
@@ -37,10 +37,10 @@ HemsyEmbed.open("instant", {
 
 <Warning>
   `HemsyEmbed.open("instant", ...)` only works when the embed is configured
-  with instant mode — `data-hemsy-mode="instant"` on the script tag or
+  with instant mode: `data-hemsy-mode="instant"` on the script tag or
   `mode: "instant"` on `HemsyEmbedConfig`. Without it, the instant parameters
   are not forwarded and the modal opens as a plain embed. Conversely, with
-  instant mode set, `HemsyEmbed.open("share", ...)` will not work — see
+  instant mode set, `HemsyEmbed.open("share", ...)` will not work. See
   [Launch modes](/embeds/launch-modes#instant-is-page-wide).
 </Warning>
 
