@@ -8,6 +8,9 @@ The Hemsy MCP server exposes a single tool, `visualize`, over stateless Streamab
 ```text
 Server URL:  https://api.hemsy.ai/mcp
 Auth:        Authorization: Bearer hemsy_...
+
+Keyed URL:   https://api.hemsy.ai/mcp/hemsy_...
+Auth:        none (key is in the path) — for connector UIs that only offer OAuth or no-auth
 ```
 
 ## Connect a client
@@ -33,21 +36,23 @@ Most MCP clients take a server URL plus optional headers. Use your API key from 
 
   </Tab>
   <Tab title="Claude">
-    Claude Desktop / Claude Code custom connector:
+    Claude's remote connector UI only offers **OAuth** or **no authentication** — it cannot send a Bearer header. Use the keyed URL:
 
-    ```json
-    {
-      "mcpServers": {
-        "hemsy-visualize": {
-          "type": "http",
-          "url": "https://api.hemsy.ai/mcp",
-          "headers": {
-            "Authorization": "Bearer hemsy_..."
-          }
-        }
-      }
-    }
+    ```text
+    https://api.hemsy.ai/mcp/hemsy_...
     ```
+
+    Register the connector with **no authentication**. The API key in the path is what authenticates the request.
+
+  </Tab>
+  <Tab title="ChatGPT">
+    ChatGPT's connector UI only offers **OAuth** or **no authentication** — it cannot send a Bearer header. Use the keyed URL:
+
+    ```text
+    https://api.hemsy.ai/mcp/hemsy_...
+    ```
+
+    Register the connector with **no authentication**. The API key in the path is what authenticates the request.
 
   </Tab>
   <Tab title="Other clients">
@@ -55,6 +60,9 @@ Most MCP clients take a server URL plus optional headers. Use your API key from 
     at `https://api.hemsy.ai/mcp` and send the `Authorization: Bearer
     hemsy_...` header on every request. The server is stateless: no session
     setup required.
+
+    If the client UI only supports OAuth or no-auth, use the keyed URL
+    (`https://api.hemsy.ai/mcp/hemsy_...`) with no authentication instead.
   </Tab>
 </Tabs>
 
