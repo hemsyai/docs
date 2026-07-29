@@ -30,6 +30,7 @@ Most MCP clients take a server URL plus optional headers. Use your API key from 
       }
     }
     ```
+
   </Tab>
   <Tab title="Claude">
     Claude Desktop / Claude Code custom connector:
@@ -47,6 +48,7 @@ Most MCP clients take a server URL plus optional headers. Use your API key from 
       }
     }
     ```
+
   </Tab>
   <Tab title="Other clients">
     Any client that supports Streamable HTTP MCP works the same way: point it
@@ -92,5 +94,5 @@ Response (structured content):
 
 - **Pass only what the user picked.** A search tool may suggest ten products; call `visualize` with the one or two the user actually wants to see. One product per call is the common case; multiple products are composed into the same scene.
 - **`productUrl` is the fidelity signal.** When the product page URL belongs to a Hemsy merchant, that item renders with the merchant's catalog reference assets. The response echoes `storeSlug` so you can reuse it in follow-up calls.
-- **Renders take 40–160 seconds.** Configure your client's tool timeout accordingly.
+- **Renders take on avg. 10 to 20 seconds.** Configure your client's tool timeout accordingly.
 - **1 credit per successful render.** Errors (`401` no key, `402` no credits, `429` rate limited) are returned before any render starts.
