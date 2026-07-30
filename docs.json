@@ -1,6 +1,6 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
+  "theme": "palm",
   "name": "Hemsy | API Documentation",
   "colors": {
     "primary": "#090909",
@@ -9,39 +9,69 @@
   },
   "favicon": "/favicon.ico",
   "navigation": {
-    "groups": [
+    "products": [
       {
-        "group": "Merchants",
-        "pages": [
+        "product": "For Merchants",
+        "tabs": [
           {
-            "group": "Embeds",
-            "pages": [
-              "embeds/overview",
-              "embeds/launch-modes",
-              "embeds/checkout-vs-cart",
-              "embeds/javascript-api"
+            "tab": "Embeds",
+            "groups": [
+              {
+                "group": "Embeds",
+                "pages": [
+                  "embeds/overview",
+                  "embeds/launch-modes",
+                  "embeds/checkout-vs-cart",
+                  "embeds/javascript-api"
+                ]
+              }
             ]
           },
-          "deep-links",
           {
-            "group": "Integrations",
-            "pages": ["segment"]
+            "tab": "Deep Links",
+            "pages": ["deep-links"]
           },
-          "permissions"
+          {
+            "tab": "Integrations",
+            "groups": [
+              {
+                "group": "Integrations",
+                "pages": ["segment"]
+              }
+            ]
+          },
+          {
+            "tab": "Permissions",
+            "pages": ["permissions"]
+          },
+          {
+            "tab": "API Reference",
+            "pages": ["api-reference/merchant-try-on"]
+          }
         ]
       },
       {
-        "group": "Agents",
-        "pages": [
-          "agents/overview",
-          "agents/authentication",
-          "agents/mcp",
-          "agents/rest-api"
+        "product": "For Developers",
+        "tabs": [
+          {
+            "tab": "Agents",
+            "groups": [
+              {
+                "group": "Agents",
+                "pages": [
+                  "agents/overview",
+                  "agents/authentication",
+                  "agents/mcp",
+                  "agents/rest-api"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "API Reference",
+            "pages": ["api-reference/agent-try-on"]
+          }
         ]
-      },
-      {
-        "group": "API Reference",
-        "pages": ["api-reference/merchant-try-on", "api-reference/agent-try-on"]
       }
     ]
   },
@@ -74,7 +104,7 @@
         "href": "mailto:support@hemsy.ai"
       },
       {
-        "label": "Developers",
+        "label": "API keys",
         "href": "https://developers.hemsy.ai"
       }
     ],
