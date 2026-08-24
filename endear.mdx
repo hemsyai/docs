@@ -1,0 +1,73 @@
+---
+title: "Endear"
+description: "Let stylists turn a Hemsy try-on look into an Endear story without leaving the try-on experience."
+---
+
+Hemsy can push a finished try-on look into [Endear](https://endearhq.com) as a **story**. The story uses the generated try-on image as its cover photo and attaches every product in the look, so your team can send it to a client from Endear like any other story.
+
+This is a **stylist-facing** integration. Shoppers never see it, and it does not forward analytics events — for that, see [Segment](/segment).
+
+## Where it appears
+
+The **Send to Endear** button appears on the try-on result screen in **stylist surfaces** only:
+
+| Surface | How it's opened |
+| --- | --- |
+| **Stylist tab** in the Hemsy dashboard | Available to owners, admins, and members with the stylist role. |
+| **Stylist embed** in another tool | Hemsy loaded with the `stylist=1` parameter, for example inside Endear or a support desk: `https://hemsy.ai/embed/{subdomain}?embed=1&stylist=1` |
+
+The button is hidden in the shopper-facing [embedded and hosted experiences](/embeds/overview), and it only renders once an Endear API key is saved for that store.
+
+## Before you start
+
+- An Endear account with API access.
+- Your Shopify catalog **synced into Endear**. Hemsy attaches products by their Shopify variant ID, so a look can only be sent if those variants already exist in Endear.
+- A Hemsy plan that includes **Integrations**.
+
+## Setup
+
+1. In the Hemsy dashboard, open **Integrations**.
+2. On the **Endear** card, paste your **Endear API Key**. You'll find it in your Endear dashboard under **Settings → API**.
+3. Save. The card shows **Connected**, and **Send to Endear** appears for stylists on that store.
+
+Your key is stored encrypted and is never exposed to the browser. Use **Replace API key** to rotate it, or **Disconnect** to remove it — disconnecting immediately hides the button for stylists.
+
+<Note>
+  Endear only needs an API key. Unlike Segment, there is no endpoint URL to
+  configure.
+</Note>
+
+## Creating a story
+
+1. Build the look and run the try-on as usual.
+2. On the result screen, click **Send to Endear**.
+3. Enter a **Title** (required) and an optional **Description**.
+4. Click **Create Story**. Hemsy confirms with **Story created in Endear!** and the story is ready in Endear.
+
+## What Hemsy sends
+
+Each story is built from the look on screen:
+
+| Story item | Contents |
+| --- | --- |
+| **Cover photo** | The generated try-on image, uploaded to Hemsy storage and passed to Endear as a public image URL. No product is attached to this item. |
+| **One item per product** | The Endear product variant for the selected Shopify variant, plus that variant's catalog image (falling back to the look image when the variant has none). |
+
+Hemsy resolves the Endear variant reference from your synced catalog, so Shopify variant `41931355815995` becomes `shop://{shop-integration-id}/ProductVariant/41931355815995`.
+
+## Troubleshooting
+
+| Message | What to do |
+| --- | --- |
+| **One or more products were not found in Endear. Make sure your catalog is synced.** | The look contains variants Endear doesn't know about. Re-sync the Shopify catalog in Endear, then try again. |
+| **No synced products found in Endear. Sync your catalog before creating stories.** | Endear has no Shopify products at all, so Hemsy can't resolve variant references. Connect and sync the catalog in Endear first. |
+| **Endear created the story but no products were added.** | The story was created but every product failed to attach. Confirm the catalog is synced and that the variants in the look exist in Endear. |
+| **Not allowed to create stories with this API key.** | The key lacks story permissions or belongs to a different account. Generate a new key in Endear and replace it in **Integrations**. |
+| **Endear integration not configured** | No API key is saved for this store. Add one in **Integrations**. |
+
+If **Send to Endear** never appears, check that the card shows **Connected** and that you're in a stylist surface — the button is intentionally hidden in shopper-facing embeds.
+
+## Related docs
+
+- [Segment](/segment): forward shopper try-on events to your analytics pipeline
+- [Hemsy Embeds](/embeds/overview): how the try-on experience is embedded

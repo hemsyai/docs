@@ -1,69 +1,44 @@
 ---
 title: "Overview"
-description: "Add the Hemsy embed to your storefront: one script tag, launcher elements, and a choice of what happens at checkout."
+description: "Add the Hemsy embed to your storefront: pick an install path, then configure launchers and what happens at checkout."
 ---
 
-Hemsy Embeds let shoppers open the full Hemsy try-on experience in a modal on your own storefront. One script tag turns any element on your page into a launcher.
+Hemsy Embeds let shoppers open the full Hemsy try-on experience in a modal on your own storefront. Any element on the page can become a launcher.
 
-There are only three things to decide:
+However it's installed, an embed comes down to three knobs:
 
 | Knob | Where it's set | What it controls |
 | --- | --- | --- |
-| **Script setup** | The `<script>` tag (once per page) | Your store subdomain, which elements are launchers, and page-wide behavior |
-| **Launch mode** | Attributes on each launcher element | What that click opens: Sandbox, product context, Bundle, Share, or Instant |
-| **Final action** | `data-hemsy-action` on the script tag | What the final CTA does: Shopify checkout (default) or a cart handoff to your site |
+| **Embed setup** | Once per storefront (theme editor or script tag) | Your store subdomain, which elements are launchers, and page-wide defaults |
+| **Launch mode** | Per launcher | What that click opens: Sandbox, product context, Bundle, Share, Flow, or Instant |
+| **Final action** | Page-wide default, overridable per launcher | What the final CTA does: Shopify checkout (default) or handing items to your cart |
 
 Everything else in these docs is payload detail or recipes for those three knobs.
 
-## Install
+## Choose your install
 
-```html
-<script
-  src="https://hemsy.ai/hemsy-embed.js"
-  data-hemsy-subdomain="your-store-subdomain"
-  data-hemsy-selector=".hemsy-launcher"
-  defer
-></script>
+There are two ways to put Hemsy on a storefront. Both load the same embed script and use the same launcher attributes — the only difference is who writes the markup.
 
-<a class="hemsy-launcher" href="#">Design a look</a>
-```
+<CardGroup cols="2">
+  <Card title="Shopify theme extension" icon="shopify" href="/embeds/shopify">
+    For Online Store themes. Enable the app embed and add trigger blocks from
+    the theme editor. No code, and Hemsy handles the cart for you.
+  </Card>
+  <Card title="Script tag" icon="code" href="/embeds/script">
+    For headless Shopify storefronts (Hydrogen, custom frontends) and any page
+    where you own the markup. One script tag plus launcher attributes.
+  </Card>
+</CardGroup>
 
-Any element matching `data-hemsy-selector` becomes a launcher. With no extra attributes, clicking it opens **Sandbox mode**: the full interactive experience, starting blank.
+| Your storefront | Install path |
+| --- | --- |
+| Standard Shopify Online Store theme | [Theme extension](/embeds/shopify) |
+| Headless Shopify (Hydrogen, custom frontend) | [Script tag](/embeds/script) with [event callbacks](/embeds/checkout-vs-cart#event-callbacks) for the cart |
+| Anything else | [Script tag](/embeds/script) |
 
-Use a shared class selector like `.hemsy-launcher` when multiple elements should open Hemsy. Avoid reusing the same `id` on multiple elements.
+## Configure it
 
-<Note>
-  Launchers are bound when the script loads. Elements added to the page later
-  (for example by client-side rendering after load) will not automatically
-  become launchers. Use the [JavaScript API](/embeds/javascript-api) for
-  dynamic elements.
-</Note>
-
-## Script attributes
-
-| Attribute | Required | Example | Description |
-| --- | --- | --- | --- |
-| `data-hemsy-subdomain` | Yes | `"mystore"` | Your Hemsy store subdomain. For `mystore.hemsy.ai`, use `"mystore"`. |
-| `data-hemsy-selector` | Yes | `".hemsy-launcher"` | CSS selector for elements that launch Hemsy. |
-| `data-hemsy-mode` | No | `"instant"` | Omit for the default interactive experience. Set to `"instant"` to skip model selection and generate immediately. See [Instant](/embeds/launch-modes#instant). |
-| `data-hemsy-action` | No | `"cart"` | Final CTA behavior: `"checkout"` (default) opens Shopify checkout; `"cart"` hands variant data back to your site. See [Checkout vs Cart](/embeds/checkout-vs-cart). |
-| `data-hemsy-anonymous-id` | No | `"visitor-42"` | Anonymous visitor ID passed through to Hemsy for analytics and order metadata. See [Segment](/segment). |
-
-Event callbacks (`onItemAdded`, `onItemRemoved`, `onProductVariantData`) are configured on `window.HemsyEmbedConfig`, not as data attributes. See [Checkout vs Cart](/embeds/checkout-vs-cart#event-callbacks).
-
-## Rules worth knowing up front
-
-<Warning>
-  **Instant and Share cannot coexist on the same script tag.** When the script
-  has `data-hemsy-mode="instant"`, share launchers, `?share=` links, and
-  programmatic share opens all stop working for that embed instance. The share
-  parameter is never forwarded. Use the default script mode for share buttons.
-</Warning>
-
-- Prefer `data-hemsy-action` for checkout vs cart. The legacy `data-hemsy-mode="cart"` still works for backward compatibility, but `data-hemsy-mode` should be reserved for `"instant"`.
-- `data-hemsy-trigger` is not a supported attribute. If you see it in old snippets, replace it with a `data-hemsy-selector` match plus the appropriate launcher attribute.
-
-## Where to go next
+These pages apply to both install paths — the theme extension's settings map one-to-one onto the same launcher attributes you'd write by hand.
 
 <CardGroup cols="2">
   <Card title="Launch modes" icon="rocket" href="/embeds/launch-modes">

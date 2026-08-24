@@ -1,0 +1,58 @@
+---
+title: "Script Install"
+description: "Install the Hemsy embed with one script tag: for headless Shopify storefronts, custom frontends, and any page where you own the markup."
+---
+
+One script tag turns any element on your page into a Hemsy launcher. This is the install path when you own the storefront code: Hydrogen and other headless Shopify setups, custom frontends, or landing pages outside your theme.
+
+<Note>
+  On a standard Shopify Online Store theme, the [theme app
+  extension](/embeds/shopify) places this same script for you from the theme
+  editor — no code. Use this page when that isn't an option.
+</Note>
+
+## Install
+
+```html
+<script
+  src="https://hemsy.ai/hemsy-embed.js"
+  data-hemsy-subdomain="your-store-subdomain"
+  data-hemsy-selector=".hemsy-launcher"
+  defer
+></script>
+
+<a class="hemsy-launcher" href="#">Design a look</a>
+```
+
+Any element matching `data-hemsy-selector` becomes a launcher. With no extra attributes, clicking it opens **Sandbox mode**: the full interactive experience, starting blank. What each launcher opens, and what its final CTA does, is controlled by [launcher attributes](/embeds/launch-modes).
+
+Use a shared class selector like `.hemsy-launcher` when multiple elements should open Hemsy. Avoid reusing the same `id` on multiple elements.
+
+<Note>
+  Launchers are bound when the script loads. Elements added to the page later
+  (for example by client-side rendering after load) will not automatically
+  become launchers. Use the [JavaScript API](/embeds/javascript-api) for
+  dynamic elements. One exception: the script re-scans for launchers on
+  Shopify's `shopify:section:load` event, so theme editor re-renders keep
+  working.
+</Note>
+
+## Script attributes
+
+| Attribute | Required | Example | Description |
+| --- | --- | --- | --- |
+| `data-hemsy-subdomain` | Yes | `"mystore"` | Your Hemsy store subdomain. For `mystore.hemsy.ai`, use `"mystore"`. |
+| `data-hemsy-selector` | Yes | `".hemsy-launcher"` | CSS selector for elements that launch Hemsy. |
+| `data-hemsy-mode` | No | `"instant"` | Page-wide default for [Instant mode](/embeds/launch-modes#instant). Prefer setting `data-hemsy-mode="instant"` on individual launchers instead. |
+| `data-hemsy-action` | No | `"cart"` | Default final CTA behavior: `"checkout"` (default) opens Shopify checkout; `"cart"` hands items to your cart. Individual launchers can override it. See [Checkout vs Cart](/embeds/checkout-vs-cart). |
+| `data-hemsy-cart-strategy` | No | `"native"` | With the `cart` action, `"native"` makes Hemsy add returned items straight into the Shopify cart itself. Requires Shopify's Ajax cart API, so it applies to Online Store themes, not headless storefronts. See [Native cart strategy](/embeds/checkout-vs-cart#native-cart-strategy). |
+| `data-hemsy-anonymous-id` | No | `"visitor-42"` | Anonymous visitor ID passed through to Hemsy for analytics and order metadata. See [Segment](/segment). |
+| `data-hemsy-auto-close` | No | `"false"` | Keep the modal open after the cart handoff instead of closing it. |
+
+Event callbacks (`onItemAdded`, `onItemRemoved`, `onProductVariantData`) are configured on `window.HemsyEmbedConfig`, not as data attributes. See [Checkout vs Cart](/embeds/checkout-vs-cart#event-callbacks). On headless storefronts, `onProductVariantData` is how returned items reach your cart.
+
+## Rules worth knowing up front
+
+- Instant mode and the final action are **per launcher**: set `data-hemsy-mode="instant"` or `data-hemsy-action` on a launcher element to affect just that button. The same attributes on the script tag act as page-wide defaults. Instant and Share launchers coexist fine on the same page.
+- Prefer `data-hemsy-action` for checkout vs cart. The legacy script-level `data-hemsy-mode="cart"` still works for backward compatibility, but `data-hemsy-mode` should be reserved for `"instant"`.
+- `data-hemsy-trigger` has no launcher semantics of its own. It's the conventional selector hook (`data-hemsy-selector="[data-hemsy-trigger]"`), which is what the [Shopify theme extension](/embeds/shopify) uses by default.

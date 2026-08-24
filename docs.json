@@ -17,9 +17,16 @@
             "tab": "Embeds",
             "groups": [
               {
-                "group": "Embeds",
+                "group": "Get Started",
+                "pages": ["embeds/overview"]
+              },
+              {
+                "group": "Installation",
+                "pages": ["embeds/shopify", "embeds/script"]
+              },
+              {
+                "group": "Configuration",
                 "pages": [
-                  "embeds/overview",
                   "embeds/launch-modes",
                   "embeds/checkout-vs-cart",
                   "embeds/javascript-api"
@@ -36,7 +43,7 @@
             "groups": [
               {
                 "group": "Integrations",
-                "pages": ["segment"]
+                "pages": ["segment", "endear"]
               }
             ]
           },

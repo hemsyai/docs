@@ -3,12 +3,14 @@ title: "Checkout vs Cart Resolution"
 description: "Choose what the final CTA does: open Shopify checkout, or hand variant data back to your storefront's own cart."
 ---
 
-When a shopper finishes a try-on, the result screen shows one final CTA. `data-hemsy-action` on the script tag decides what it does. It applies to every launch mode, including Instant.
+When a shopper finishes a try-on, the result screen shows one final CTA. `data-hemsy-action` on the script tag sets the default, and any launcher element can override it with its own `data-hemsy-action`. It applies to every launch mode, including Instant.
 
 | Action               | CTA label        | What happens                                                                                                                              |
 | -------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | `checkout` (default) | "Go to Checkout" | Hemsy creates or opens a Shopify checkout/cart URL directly.                                                                              |
 | `cart`               | "Go to Cart"     | Hemsy posts the selected variants back to your page, calls `window.HemsyEmbedConfig.onProductVariantData(payload)`, and closes the modal. |
+
+In the [Shopify theme extension](/embeds/shopify), this is the app embed's "When shoppers finish" setting and each trigger block's override — no attributes to write. The examples below show the equivalent [script install](/embeds/script) markup.
 
 Use `cart` when your storefront owns cart state and should add the returned variants itself: headless storefronts, Hydrogen, or any site with a custom cart drawer.
 
@@ -22,11 +24,47 @@ Use `cart` when your storefront owns cart state and should add the returned vari
 ></script>
 ```
 
+To override the action for a single launcher, put `data-hemsy-action` on the element:
+
+```html
+<!-- Page default is checkout; this button hands items to the cart instead -->
+<button class="hemsy-launcher" data-hemsy-action="cart">Try before you buy</button>
+```
+
 <Note>
-  The legacy `data-hemsy-mode="cart"` still maps to the cart action for backward
-  compatibility, but prefer `data-hemsy-action`: `data-hemsy-mode` should be
-  reserved for `"instant"`. (`data-hemsy-mode="checkout"` has no effect;
-  checkout is simply the default action.)
+  The legacy script-level `data-hemsy-mode="cart"` still maps to the cart
+  action for backward compatibility, but prefer `data-hemsy-action`:
+  `data-hemsy-mode` should be reserved for `"instant"`. (`data-hemsy-mode="checkout"`
+  has no effect; checkout is simply the default action.)
+</Note>
+
+## Native cart strategy
+
+By default the `cart` action hands items to *your* code via `onProductVariantData`, which means writing a callback. If your storefront is a standard Shopify theme, skip that entirely with `data-hemsy-cart-strategy="native"`:
+
+```html
+<script
+  src="https://hemsy.ai/hemsy-embed.js"
+  data-hemsy-subdomain="your-store-subdomain"
+  data-hemsy-selector=".hemsy-launcher"
+  data-hemsy-action="cart"
+  data-hemsy-cart-strategy="native"
+  defer
+></script>
+```
+
+With the native strategy, when the shopper clicks the final CTA Hemsy:
+
+1. Adds the returned items to the Shopify cart via the Ajax API (`/cart/add.js`), converting variant GIDs to numeric IDs and mapping item attributes to line-item properties.
+2. Dispatches `cart:refresh`, `cart:updated`, and `cart:change` events on `document` with the updated cart, so cart drawers and count bubbles that listen for them update in place.
+3. Closes the modal once the add completes (unless `data-hemsy-auto-close="false"`).
+
+Callbacks still fire if you define them, so you can layer analytics on top. A cart failure never traps the shopper: the modal closes regardless and the error is logged to the console.
+
+<Note>
+  The [Shopify theme extension](/embeds/shopify) uses the native strategy
+  automatically, so merchants who install through the theme editor get a working
+  cart handoff with zero code.
 </Note>
 
 ## Event callbacks
