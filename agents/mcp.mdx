@@ -102,5 +102,5 @@ Response (structured content):
 
 - **Pass only what the user picked.** A search tool may suggest ten products; call `visualize` with the one or two the user actually wants to see. One product per call is the common case; multiple products are composed into the same scene.
 - **`productUrl` is the fidelity signal.** When the product page URL belongs to a Hemsy merchant, that item renders with the merchant's catalog reference assets. The response echoes `storeSlug` so you can reuse it in follow-up calls.
-- **Renders take on avg. 10 to 20 seconds.** Configure your client's tool timeout accordingly.
+- **Renders can take a few minutes.** Set your client's tool timeout to at least 300 seconds, same as the [REST API](/agents/rest-api#timeouts).
 - **1 credit per successful render.** Errors (`401` no key, `402` no credits, `429` rate limited) are returned before any render starts.

@@ -3,7 +3,7 @@ title: "Overview"
 description: "Add the Hemsy embed to your storefront: pick an install path, then configure launchers and what happens at checkout."
 ---
 
-Hemsy Embeds let shoppers open the full Hemsy try-on experience in a modal on your own storefront. Any element on the page can become a launcher.
+Hemsy Embeds let shoppers open the full Hemsy visualization experience in a modal on your own storefront. Any element on the page can become a launcher.
 
 However it's installed, an embed comes down to three knobs:
 
@@ -17,7 +17,7 @@ Everything else in these docs is payload detail or recipes for those three knobs
 
 ## Choose your install
 
-There are two ways to put Hemsy on a storefront. Both load the same embed script and use the same launcher attributes — the only difference is who writes the markup.
+There are two ways to put Hemsy on a storefront. Both load the same embed script and use the same launcher attributes. The only difference is who writes the markup.
 
 <CardGroup cols="2">
   <Card title="Shopify theme extension" icon="shopify" href="/embeds/shopify">
@@ -25,20 +25,20 @@ There are two ways to put Hemsy on a storefront. Both load the same embed script
     the theme editor. No code, and Hemsy handles the cart for you.
   </Card>
   <Card title="Script tag" icon="code" href="/embeds/script">
-    For headless Shopify storefronts (Hydrogen, custom frontends) and any page
-    where you own the markup. One script tag plus launcher attributes.
+    For editing your theme code directly, or any page where you own the
+    markup. One script tag plus launcher attributes.
   </Card>
 </CardGroup>
 
-| Your storefront | Install path |
+| How you want to install | Install path |
 | --- | --- |
-| Standard Shopify Online Store theme | [Theme extension](/embeds/shopify) |
-| Headless Shopify (Hydrogen, custom frontend) | [Script tag](/embeds/script) with [event callbacks](/embeds/checkout-vs-cart#event-callbacks) for the cart |
-| Anything else | [Script tag](/embeds/script) |
+| From the Shopify theme editor, no code | [Theme extension](/embeds/shopify) |
+| By editing your Shopify theme code | [Script tag](/embeds/script) |
+| On any other page you control (e.g., You own web app) | [Script tag](/embeds/script) |
 
 ## Configure it
 
-These pages apply to both install paths — the theme extension's settings map one-to-one onto the same launcher attributes you'd write by hand.
+These pages apply to both install paths. The theme extension's settings map one-to-one onto the same launcher attributes you'd write by hand.
 
 <CardGroup cols="2">
   <Card title="Launch modes" icon="rocket" href="/embeds/launch-modes">

@@ -1,14 +1,13 @@
 ---
 title: "Script Install"
-description: "Install the Hemsy embed with one script tag: for headless Shopify storefronts, custom frontends, and any page where you own the markup."
+description: "Install the Hemsy embed by adding one script tag to your theme code, or to any page where you own the markup."
 ---
 
-One script tag turns any element on your page into a Hemsy launcher. This is the install path when you own the storefront code: Hydrogen and other headless Shopify setups, custom frontends, or landing pages outside your theme.
+One script tag turns any element on your page into a Hemsy launcher. Add it to your Shopify theme code (for example `theme.liquid`) if you'd rather edit the theme yourself, or to any other page where you own the markup.
 
 <Note>
-  On a standard Shopify Online Store theme, the [theme app
-  extension](/embeds/shopify) places this same script for you from the theme
-  editor — no code. Use this page when that isn't an option.
+  Prefer not to touch code? The [theme app extension](/embeds/shopify) places
+  this same script for you from the theme editor.
 </Note>
 
 ## Install
@@ -45,11 +44,12 @@ Use a shared class selector like `.hemsy-launcher` when multiple elements should
 | `data-hemsy-selector` | Yes | `".hemsy-launcher"` | CSS selector for elements that launch Hemsy. |
 | `data-hemsy-mode` | No | `"instant"` | Page-wide default for [Instant mode](/embeds/launch-modes#instant). Prefer setting `data-hemsy-mode="instant"` on individual launchers instead. |
 | `data-hemsy-action` | No | `"cart"` | Default final CTA behavior: `"checkout"` (default) opens Shopify checkout; `"cart"` hands items to your cart. Individual launchers can override it. See [Checkout vs Cart](/embeds/checkout-vs-cart). |
-| `data-hemsy-cart-strategy` | No | `"native"` | With the `cart` action, `"native"` makes Hemsy add returned items straight into the Shopify cart itself. Requires Shopify's Ajax cart API, so it applies to Online Store themes, not headless storefronts. See [Native cart strategy](/embeds/checkout-vs-cart#native-cart-strategy). |
+| `data-hemsy-cart-strategy` | No | `"native"` | With the `cart` action, `"native"` makes Hemsy add returned items straight into the Shopify cart itself. Uses Shopify's Ajax cart API, which every Online Store theme has. See [Native cart strategy](/embeds/checkout-vs-cart#native-cart-strategy). |
 | `data-hemsy-anonymous-id` | No | `"visitor-42"` | Anonymous visitor ID passed through to Hemsy for analytics and order metadata. See [Segment](/segment). |
 | `data-hemsy-auto-close` | No | `"false"` | Keep the modal open after the cart handoff instead of closing it. |
+| `data-hemsy-incrementality` | No | `"true"` | Opt this page into incrementality init. Required for the storefront holdout. See [Incrementality](/embeds/incrementality). |
 
-Event callbacks (`onItemAdded`, `onItemRemoved`, `onProductVariantData`) are configured on `window.HemsyEmbedConfig`, not as data attributes. See [Checkout vs Cart](/embeds/checkout-vs-cart#event-callbacks). On headless storefronts, `onProductVariantData` is how returned items reach your cart.
+Event callbacks (`onItemAdded`, `onItemRemoved`, `onProductVariantData`) are configured on `window.HemsyEmbedConfig`, not as data attributes. See [Checkout vs Cart](/embeds/checkout-vs-cart#event-callbacks). Without the native cart strategy, `onProductVariantData` is how returned items reach your cart.
 
 ## Rules worth knowing up front
 

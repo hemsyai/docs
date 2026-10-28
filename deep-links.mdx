@@ -19,10 +19,11 @@ session:
 | `?closet=`       | Base64-encoded payload for **one or more products**, with optional line-item attributes. |
 | `?product=`      | Shortcut for a **single product** by Shopify ID or handle.                               |
 | `?share=`        | A **shared look** short ID, used by the in-app Share feature.                            |
+| `?flow=`         | Starts a **guided flow** by its flow ID (copy it from the dashboard's Flows page).       |
 | `?anonymous_id=` | Anonymous visitor ID passed into Hemsy for analytics, attribution, and integrations.     |
 
-All of these can be combined with `?store=<slug>` on preview deployments to
-target a specific tenant.
+All of these can be combined with `?store=<slug>` on [staging](/staging) and
+preview deployments to target a specific tenant.
 
 <Note>
   `?closet=` is the canonical, structured format. Use it for anything beyond a
@@ -221,7 +222,7 @@ Use attributes to:
 ## Bundles and the `_bundleId` reserved key
 
 Closet URLs are the canonical way to launch a **bundle** into Hemsy. A bundle is
-a group of products a merchant wants a shopper to try on and check out with
+a group of products a merchant wants a shopper to visualize and check out with
 together (for example, a "Starter Bedroom Bundle" composed of a sheet set, a
 blanket, and a pillow insert).
 

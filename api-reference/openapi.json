@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Hemsy API",
-    "description": "Hemsy API allows you to generate virtual try-ons for your products.",
+    "description": "Hemsy API allows you to generate visualizations for your products.",
     "version": "1.0.0",
     "contact": {
       "name": "Hemsy Support",
@@ -19,8 +19,8 @@
     "/api/try-on": {
       "post": {
         "operationId": "tryOn",
-        "summary": "Try On",
-        "description": "Generate a virtual try-on image from a user photo and product image URLs, or Shopify product identifiers.",
+        "summary": "Visualize",
+        "description": "Generate a visualization from a user photo and product image URLs, or Shopify product identifiers.",
         "security": [{ "bearerAuth": [] }],
         "requestBody": {
           "required": true,
@@ -104,13 +104,25 @@
         },
         "responses": {
           "200": {
-            "description": "Successful try-on",
+            "description": "Successful visualization",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
                     "image": { "type": "string" },
+                    "attribution": {
+                      "type": "array",
+                      "description": "Attributes to copy onto the shopper's Shopify cart (cart or line-item level) so the resulting order is attributed to this visualization in the dashboard's Analytics page. Underscore-prefixed keys are hidden from shoppers.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "key": { "type": "string", "example": "_hemsy_request_id" },
+                          "value": { "type": "string" }
+                        },
+                        "required": ["key", "value"]
+                      }
+                    },
                     "code": { "type": "string" },
                     "error": { "type": "string" },
                     "message": { "type": "string" }

@@ -3,13 +3,13 @@ title: "Shopify Theme Extension"
 description: "Install Hemsy on a Shopify storefront from the theme editor: an app embed for the script and a trigger block for launch buttons. No code."
 ---
 
-The Hemsy Shopify app includes a theme app extension, so everything on the other embed pages (the script tag, launcher attributes, checkout vs cart) is configured from the Shopify theme editor instead of your theme code. Your theme files are never edited, and uninstalling the app removes everything.
+The Hemsy Shopify app includes a theme app extension, so the script tag, launcher attributes, and checkout vs cart are configured from the Shopify theme editor instead of your theme code. Page-wide options without a theme editor setting, such as [incrementality](/embeds/incrementality), take one line of theme code. Your theme files are never edited, and uninstalling the app removes everything.
 
 The extension has two parts:
 
 | Part | What it is | Where it lives |
 | --- | --- | --- |
-| **Hemsy Embed** (app embed) | Loads the embed script with your store slug and the page-wide checkout/cart default | Theme editor → **App embeds**, once per theme |
+| **Hemsy Embed** (app embed) | Loads the embed script with your store slug and the page-wide checkout/cart default | Theme editor › **App embeds**, once per theme |
 | **Hemsy Trigger** (app block) | A styleable button or link that opens Hemsy, one per placement | Any section, typically product pages |
 
 <Note>
@@ -19,7 +19,7 @@ The extension has two parts:
 
 ## 1. Enable the app embed
 
-1. In the Shopify admin, go to **Online Store → Themes → Customize**, then open **App embeds** (the puzzle-piece icon).
+1. In the Shopify admin, go to **Online Store › Themes › Customize**, then open **App embeds** (the puzzle-piece icon).
 2. Toggle on **Hemsy Embed**.
 3. Paste your **Hemsy store slug** (copy it from the dashboard's Embed page).
 4. Choose what happens **when shoppers finish**:
@@ -54,6 +54,6 @@ If you want to launch Hemsy from an element the trigger block can't reach (a nav
 
 The app embed's script binds it automatically, including elements re-rendered by the theme editor, which the script rebinds on `shopify:section:load`.
 
-## Headless or custom storefront?
+## Prefer editing code?
 
-The theme extension requires an Online Store theme. If your storefront is headless (Hydrogen or a custom frontend), use the [script install](/embeds/script) instead — same script, same attributes, and your code owns the cart handoff via [event callbacks](/embeds/checkout-vs-cart#event-callbacks). Everything else in these docs applies equally to both install paths.
+Everything the extension does can also be done in your theme code: add the [script install](/embeds/script) to `theme.liquid` and put launcher attributes on your own elements. Same script, same attributes. Everything else in these docs applies equally to both install paths.

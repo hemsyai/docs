@@ -1,11 +1,11 @@
 ---
 title: "Segment"
-description: "Forward Hemsy try-on events from the embedded or hosted experience to your Segment workspace."
+description: "Forward Hemsy visualization events from the embedded or hosted experience to your Segment workspace."
 ---
 
-Hemsy can forward **browser-side try-on events** to [Segment](https://segment.com) as `track` calls. Use this when you want try-on behavior in the same pipelines as your storefront (GA4, Mixpanel, Klaviyo, Snowflake, and so on).
+Hemsy can forward **browser-side visualization events** to [Segment](https://segment.com) as `track` calls. Use this when you want visualization behavior in the same pipelines as your storefront (GA4, Mixpanel, Klaviyo, Snowflake, and so on).
 
-This is separate from **Hemsy Home** in the dashboard, which shows aggregated KPIs (sessions, conversion, revenue, and so on). Segment receives individual events with properties; Hemsy Home computes rollups from Hemsy's internal event store.
+This is separate from the **Analytics** page in the dashboard, which shows aggregated KPIs (sessions, conversion, revenue, and so on). Segment receives individual events with properties; Analytics computes rollups from Hemsy's internal event store.
 
 ## Where Segment forwarding applies
 
@@ -16,12 +16,12 @@ Segment forwarding works in **both** ways shoppers use Hemsy:
 | **Embedded experience** | `https://hemsy.ai/embed/{subdomain}?embed=1&…` | Your storefront loads `hemsy-embed.js` and opens Hemsy in a modal iframe.              |
 | **Hosted experience**   | `https://{subdomain}.hemsy.ai?…`               | Shoppers open your store's Hemsy subdomain directly (link, QR code, email, and so on). |
 
-Both surfaces run the same try-on app and send events through the same browser API (`POST /api/events`). Segment is **not** limited to embeds.
+Both surfaces run the same visualization app and send events through the same browser API (`POST /api/events`). Segment is **not** limited to embeds.
 
 Segment forwarding does **not** apply to:
 
-- The **Hemsy dashboard** (merchant admin UI).
-- **Server-only** events (for example attributed orders written at checkout webhooks). Those feed Hemsy Home, not the Segment forwarder.
+- The **Hemsy dashboard** (merchant admin UI). The one exception is the **Stylist** tab, which runs the stylist embed; its events are forwarded with `source: stylist`.
+- **Server-only** events (for example attributed orders written by Shopify order webhooks). Those feed Analytics, not the Segment forwarder.
 
 ## Setup
 
@@ -75,11 +75,11 @@ Use the same ID you use on your storefront and in Segment. When a shopper lands 
 
 ### Checkout metadata
 
-The same `anonymous_id` is attached to Shopify cart/checkout line-item metadata as `attributes[anonymous_id]` when the shopper completes checkout from either experience.
+The same `anonymous_id` is attached to the Shopify cart as a cart attribute (`anonymous_id`) when the shopper checks out from either experience, so it shows under the order's **Additional details**.
 
 ## How forwarding works
 
-1. The shopper uses the **embedded** or **hosted** try-on experience.
+1. The shopper uses the **embedded** or **hosted** visualization experience.
 2. The browser records the event in Hemsy and POSTs to `/api/events`.
 3. If Segment is configured, Hemsy forwards a **`track`** call with a human-readable name prefixed with `Hemsy `.
 
@@ -99,8 +99,12 @@ In addition to event-specific fields below, each forwarded `track` includes:
 | `variantIds` | `string[]`       | Shopify variant IDs for items in the look, when applicable.           |
 | `sessionId`  | `string \| null` | Hemsy session ID for this tab visit (`sessionStorage`).               |
 | `storeSlug`  | `string`         | Your Hemsy store subdomain slug.                                      |
+| `source`     | `string`         | `browser` for shoppers, `stylist` for the in-store stylist embed. Filter on this to keep associate activity out of shopper metrics. |
+| `location_id`| `string`         | Only on stylist events: the Shopify location the stylist selected.    |
 
 Segment also receives `anonymousId` and an ISO `timestamp`.
+
+The same `sessionId` is attached to Shopify carts started from Hemsy as a hidden line-item property, `_hemsy_session_id`, so orders can be joined back to the session's events.
 
 ## Forwarded events
 
@@ -108,16 +112,16 @@ Segment also receives `anonymousId` and an ISO `timestamp`.
 
 | Segment event             | When it fires                                                                           | Event properties |
 | ------------------------- | --------------------------------------------------------------------------------------- | ---------------- |
-| **Hemsy Session Started** | Once per browser tab session when the try-on experience loads and analytics bootstraps. | -                |
+| **Hemsy Session Started** | Once per browser tab session when the visualization experience loads and analytics bootstraps. | -                |
 | **Hemsy Session Engaged** | Once per session, 10 seconds after load (shopper remained in the experience).           | -                |
 
-### Try-on funnel
+### Visualization funnel
 
 | Segment event              | When it fires                                                 | Event properties                                         |
 | -------------------------- | ------------------------------------------------------------- | -------------------------------------------------------- |
-| **Hemsy Try On Started**   | Shopper starts try-on generation (photo + at least one item). | `selectedItemCount`                                      |
-| **Hemsy Try On Completed** | Try-on succeeds and the result screen is shown.               | `selectedItemCount`                                      |
-| **Hemsy Try On Failed**    | Try-on fails or returns without a generated image.            | `reason`: e.g. `no_product_images`, `generation_failed` |
+| **Hemsy Try On Started**   | Shopper starts visualization generation (photo + at least one item). | `selectedItemCount`                                      |
+| **Hemsy Try On Completed** | Visualization succeeds and the result screen is shown.               | `selectedItemCount`                                      |
+| **Hemsy Try On Failed**    | Visualization fails, returns without a generated image, or the store cannot generate (plan limit reached, model provider missing). | `reason`: e.g. `no_product_images`, `Generation failed`, `LIMIT_EXCEEDED`, `MERCHANT_MODEL_PROVIDER_REQUIRED`; `status`: HTTP status when a response was received; `code`: Hemsy error code when the response carried one |
 
 ### Look building
 
@@ -162,7 +166,7 @@ This event fires on two different paths depending on whether **share links** are
 | `type`        | When                                                                                           | Segment properties                                                         |
 | ------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
 | `share_link`  | Share links are enabled. Hemsy creates a persisted share URL, then surfaces it to the shopper. | `shortId`, `shareUrl`, `storeSlug`, `selectedItemCount`, `usedNativeShare` |
-| `share_image` | Share links are disabled. Hemsy shares or downloads the try-on image only (no share URL).      | `storeSlug`, `selectedItemCount`                                           |
+| `share_image` | Share links are disabled. Hemsy shares or downloads the visualization only (no share URL).      | `storeSlug`, `selectedItemCount`                                           |
 
 #### `usedNativeShare` vs `shareUrl` (`type: share_link` only)
 
@@ -184,7 +188,7 @@ Hemsy **always tries** the native share sheet first when `navigator.share` is av
 | **Hemsy Shared Look Opened** | When this event is reported through the browser events API. | `shortId` (when present) |
 
 <Note>
-  Shared look opens are always counted in Hemsy Home (Top Shared Links). Confirm
+  Shared look opens are always counted in Analytics (Top Shares). Confirm
   **Hemsy Shared Look Opened** in your Segment debugger for your traffic;
   contact Hemsy if you need guaranteed Segment delivery on every open.
 </Note>
@@ -212,9 +216,9 @@ Hemsy **always tries** the native share sheet first when `navigator.share` is av
 
 2. **Embedded experience:** Open Hemsy from your storefront with `data-hemsy-anonymous-id` set to a test ID (for example `segment-test-001`).
 
-3. **Hosted experience:** Open `https://{subdomain}.hemsy.ai?anonymous_id=segment-test-001` and run through upload → add items → try-on → checkout.
+3. **Hosted experience:** Open `https://{subdomain}.hemsy.ai?anonymous_id=segment-test-001` and run through upload › add items › visualization › checkout.
 
-4. In Segment **Sources → Debugger**, confirm `Hemsy *` track events with `anonymousId: segment-test-001`.
+4. In Segment **Sources › Debugger**, confirm `Hemsy *` track events with `anonymousId: segment-test-001`.
 
 If events are missing:
 
@@ -225,4 +229,4 @@ If events are missing:
 ## Related docs
 
 - [Hemsy Embeds](/embeds/overview): embedded launch modes, `data-hemsy-anonymous-id`, cart vs checkout
-- Hemsy dashboard **Home**: aggregated KPIs and funnels (no Segment required)
+- Hemsy dashboard **Analytics**: aggregated KPIs and funnels (no Segment required)

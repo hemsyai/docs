@@ -1,5 +1,18 @@
 ---
-title: "Merchant Try On"
-description: "Generate a try-on render for your own storefront's products, billed to your merchant account."
+title: "Merchant Visualize"
+description: "Generate a visualization for your own storefront's products, billed to your merchant account."
 openapi: "/api-reference/openapi.json POST /api/try-on"
 ---
+
+## Attribute orders
+
+A successful response includes an `attribution` array. Copy each `{ key, value }` onto the shopper's Shopify cart, either as cart attributes or as line-item properties on the items they visualized. Orders carrying these attributes count toward Hemsy revenue in the dashboard's Analytics page, and the `_hemsy_request_id` value links the order back to this visualization.
+
+```json
+{
+  "image": "data:image/png;base64,...",
+  "attribution": [{ "key": "_hemsy_request_id", "value": "iad1::abc123" }]
+}
+```
+
+Pass Shopify `variantId` or `productId` values in the request (rather than raw image URLs) so the visualization also appears in the store's Top Products.

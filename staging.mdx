@@ -1,0 +1,45 @@
+---
+title: "Staging"
+description: "Test Hemsy changes on the staging environment before they reach production."
+---
+
+Staging runs the latest pre-release build of Hemsy. Use it to check new features against your store before they ship to production.
+
+| Surface | Production | Staging |
+| --- | --- | --- |
+| Shopper experience | `https://{subdomain}.hemsy.ai` | `https://staging.hemsy.ai/?store={subdomain}` |
+| Dashboard | `https://dashboard.hemsy.ai` | `https://staging.dashboard.hemsy.ai` |
+| Embed script | `https://hemsy.ai/hemsy-embed.js` | `https://staging.hemsy.ai/hemsy-embed.js` |
+
+## Shopper experience
+
+Staging serves every store from one host, so you pick the store with `?store=` instead of a subdomain. Without `?store=`, staging shows the Hemsy landing page.
+
+```
+https://staging.hemsy.ai/?store=mystore
+```
+
+[Deep link](/deep-links) parameters work the same way. Add them next to `store`:
+
+```
+https://staging.hemsy.ai/?store=mystore&product=organic-cotton-duvet
+```
+
+## Embed script
+
+Load the script from staging. The embed opens Hemsy from the same host that served the script, so every launcher on the page opens staging. Every other attribute stays the same as the [production install](/embeds/script).
+
+```html
+<script
+  src="https://staging.hemsy.ai/hemsy-embed.js"
+  data-hemsy-subdomain="your-store-subdomain"
+  data-hemsy-selector=".hemsy-launcher"
+  defer
+></script>
+```
+
+The staging embed can be loaded from any page, including `localhost` and your own staging storefront, so you can test without changing your store's allowed domains.
+
+## Dashboard
+
+Sign in at [staging.dashboard.hemsy.ai](https://staging.dashboard.hemsy.ai) to try dashboard changes before release.

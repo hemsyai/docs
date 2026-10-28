@@ -3,7 +3,7 @@ title: "JavaScript API"
 description: "Open and close Hemsy programmatically with window.HemsyEmbed, and configure the embed with window.HemsyEmbedConfig."
 ---
 
-If you'd rather open Hemsy from JavaScript than from launcher attributes (for dynamic elements, custom routing, or your own event handling), use `window.HemsyEmbed`. The embed script must be loaded on the page — either install path works, since the [theme extension](/embeds/shopify) and the [script install](/embeds/script) load the same script.
+If you'd rather open Hemsy from JavaScript than from launcher attributes (for dynamic elements, custom routing, or your own event handling), use `window.HemsyEmbed`. The embed script must be loaded on the page. Either install path works, since the [theme extension](/embeds/shopify) and the [script install](/embeds/script) load the same script.
 
 <Note>
   The API uses the original mode identifiers: `"scratch"` is Sandbox mode and
@@ -59,6 +59,7 @@ window.HemsyEmbedConfig = {
   cartStrategy: "native",    // optional; same as data-hemsy-cart-strategy
   anonymousId: "visitor-42", // optional; same as data-hemsy-anonymous-id
   autoClose: false,          // optional; same as data-hemsy-auto-close
+  incrementality: true,      // optional; same as data-hemsy-incrementality
   onItemAdded: (item) => {},
   onItemRemoved: (item) => {},
   onProductVariantData: (payload) => {},

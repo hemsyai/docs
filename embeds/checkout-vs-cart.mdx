@@ -3,16 +3,16 @@ title: "Checkout vs Cart Resolution"
 description: "Choose what the final CTA does: open Shopify checkout, or hand variant data back to your storefront's own cart."
 ---
 
-When a shopper finishes a try-on, the result screen shows one final CTA. `data-hemsy-action` on the script tag sets the default, and any launcher element can override it with its own `data-hemsy-action`. It applies to every launch mode, including Instant.
+When a shopper finishes a visualization, the result screen shows one final CTA. `data-hemsy-action` on the script tag sets the default, and any launcher element can override it with its own `data-hemsy-action`. It applies to every launch mode, including Instant.
 
 | Action               | CTA label        | What happens                                                                                                                              |
 | -------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | `checkout` (default) | "Go to Checkout" | Hemsy creates or opens a Shopify checkout/cart URL directly.                                                                              |
 | `cart`               | "Go to Cart"     | Hemsy posts the selected variants back to your page, calls `window.HemsyEmbedConfig.onProductVariantData(payload)`, and closes the modal. |
 
-In the [Shopify theme extension](/embeds/shopify), this is the app embed's "When shoppers finish" setting and each trigger block's override — no attributes to write. The examples below show the equivalent [script install](/embeds/script) markup.
+In the [Shopify theme extension](/embeds/shopify), this is the app embed's "When shoppers finish" setting and each trigger block's override, with no attributes to write. The examples below show the equivalent [script install](/embeds/script) markup.
 
-Use `cart` when your storefront owns cart state and should add the returned variants itself: headless storefronts, Hydrogen, or any site with a custom cart drawer.
+Use `cart` when shoppers should land in your store's cart instead of checkout, for example a theme with a custom cart drawer.
 
 ```html
 <script
@@ -112,48 +112,3 @@ Callbacks are configured on `window.HemsyEmbedConfig` (not data attributes). Def
 ### Keeping the modal open
 
 By default, Hemsy closes the modal after the cart handoff. Set `data-hemsy-auto-close="false"` on the script tag (or `autoClose: false` on `HemsyEmbedConfig`) to keep it open (for example if you show your cart drawer next to the modal).
-
-## Hydrogen example
-
-```jsx
-import { useCart } from "@shopify/hydrogen";
-
-function HemsyEmbedSetup() {
-  const { linesAdd, linesRemove, lines, cartOpen } = useCart();
-
-  useEffect(() => {
-    window.HemsyEmbedConfig = {
-      subdomain: "your-store",
-      selector: ".hemsy-launcher",
-      action: "cart",
-      onItemAdded: ({ variantId, quantity }) => {
-        linesAdd([
-          {
-            merchandiseId: `gid://shopify/ProductVariant/${variantId}`,
-            quantity,
-          },
-        ]);
-      },
-      onItemRemoved: ({ variantId }) => {
-        const lineToRemove = lines?.find(
-          (line) =>
-            line.merchandise.id === `gid://shopify/ProductVariant/${variantId}`,
-        );
-        if (lineToRemove) {
-          linesRemove([lineToRemove.id]);
-        }
-      },
-      onProductVariantData: () => {
-        cartOpen();
-      },
-    };
-  }, [linesAdd, linesRemove, lines, cartOpen]);
-
-  return null;
-}
-```
-
-<Note>
-  `variantId` is the numeric Shopify variant ID as a string. Convert it to GID
-  format (`gid://shopify/ProductVariant/...`) for Hydrogen's cart operations.
-</Note>

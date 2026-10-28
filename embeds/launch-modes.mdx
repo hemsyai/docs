@@ -15,7 +15,7 @@ When a launcher is clicked, Hemsy picks the launch mode by checking, in order:
 4. **Bundle**: the element has `data-hemsy-closet`.
 5. **Sandbox**: none of the above; opens the full experience blank.
 
-`data-hemsy-flow` starts a guided flow when the launch has an empty look (Sandbox, or a flow-only launcher). Bundle (`data-hemsy-closet`) and Share launches skip the guided flow: closet bypass jumps straight to try-on after a photo is chosen, and share opens the shared-look viewer.
+`data-hemsy-flow` starts a guided flow when the launch has an empty look (Sandbox, or a flow-only launcher). Bundle (`data-hemsy-closet`) and Share launches skip the guided flow: closet bypass jumps straight to visualization after a photo is chosen, and share opens the shared-look viewer.
 
 `data-hemsy-action` (checkout vs cart) is independent of launch mode. It only changes what the final CTA does. See [Checkout vs Cart](/embeds/checkout-vs-cart).
 
@@ -57,7 +57,7 @@ Pre-load one or more specific products, curated looks, bundles, or campaign sele
 
 ```html
 <button class="hemsy-launcher" data-hemsy-closet="YOUR_URLSAFE_BASE64_PAYLOAD">
-  Try on Bed Bundle
+  Visualize Bed Bundle
 </button>
 ```
 
@@ -108,7 +108,7 @@ Copy flow IDs from the dashboard. The shopper walks the steps, then can exit int
 
 ## Instant
 
-Instant mode skips model selection and immediately generates a try-on image with a specific model and product payload. The shopper clicks, sees the generation loading state, and lands on the result.
+Instant mode skips model selection and immediately generates a visualization with a specific model and product payload. The shopper clicks, sees the generation loading state, and lands on the result.
 
 Instant requires **both** pieces on the launcher element:
 

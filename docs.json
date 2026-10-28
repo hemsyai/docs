@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "palm",
-  "name": "Hemsy | API Documentation",
+  "name": "Hemsy | Documentation",
   "colors": {
     "primary": "#090909",
     "light": "#6B6B6B",
@@ -11,7 +11,7 @@
   "navigation": {
     "products": [
       {
-        "product": "For Merchants",
+        "product": "For Merchant Teams",
         "tabs": [
           {
             "tab": "Embeds",
@@ -29,7 +29,8 @@
                 "pages": [
                   "embeds/launch-modes",
                   "embeds/checkout-vs-cart",
-                  "embeds/javascript-api"
+                  "embeds/javascript-api",
+                  "embeds/incrementality"
                 ]
               }
             ]
@@ -48,8 +49,12 @@
             ]
           },
           {
-            "tab": "Permissions",
+            "tab": "Roles & Permissions",
             "pages": ["permissions"]
+          },
+          {
+            "tab": "Staging",
+            "pages": ["staging"]
           },
           {
             "tab": "API Reference",
@@ -58,7 +63,7 @@
         ]
       },
       {
-        "product": "For Developers",
+        "product": "For Agent Developers",
         "tabs": [
           {
             "tab": "Agents",
@@ -109,10 +114,6 @@
       {
         "label": "Support",
         "href": "mailto:support@hemsy.ai"
-      },
-      {
-        "label": "API keys",
-        "href": "https://developers.hemsy.ai"
       }
     ],
     "primary": {

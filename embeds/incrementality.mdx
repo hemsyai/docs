@@ -1,0 +1,84 @@
+---
+title: "Incrementality"
+description: "Run a storefront holdout so you can measure the revenue Hemsy actually adds, and only after the embed is opted in."
+---
+
+Incrementality mode is an A/B holdout. 90% of shoppers see your Hemsy calls to action as usual. A random 10% never see them. Comparing the two groups is how the dashboard estimates lift and net new revenue.
+
+You configure the test in the Hemsy dashboard (**Incrementality**). The storefront does **not** start that test from the dashboard toggle alone.
+
+## The embed must opt in
+
+`hemsy-embed.js` calls `/api/incrementality/init` only when the script is explicitly opted in. Without that flag, the holdout never starts: no bucketing, no hiding, no cart tags.
+
+Existing installs (including a typical Shopify homepage script) do **not** include this attribute. That is intentional. A store with incrementality off in the dashboard should not hit Hemsy on every new session.
+
+Add **one** of these on the same page as the embed:
+
+```html
+<script
+  src="https://hemsy.ai/hemsy-embed.js"
+  data-hemsy-subdomain="your-store-subdomain"
+  data-hemsy-selector="[data-hemsy-trigger]"
+  data-hemsy-incrementality="true"
+  defer
+></script>
+```
+
+Or:
+
+```html
+<script>
+  window.HemsyEmbedConfig = {
+    incrementality: true,
+  };
+</script>
+```
+
+Accepted values: `true`, `"true"`, or `"1"`. Anything else (or omitting the flag) leaves incrementality off.
+
+<Note>
+  The [Shopify theme app embed](/embeds/shopify) has no incrementality setting.
+  If you installed from the theme editor, add the `HemsyEmbedConfig` snippet
+  above to your theme code (for example in `theme.liquid`), and the app embed's
+  script picks it up.
+</Note>
+
+Turning the dashboard toggle **on** without the script flag does nothing on the storefront. Turning the toggle **off** still matters: even an opted-in embed gets `{ enabled: false }` from init and will not hide CTAs or tag carts.
+
+## What happens when it is on
+
+Both of these must be true:
+
+1. The embed is opted in (`data-hemsy-incrementality` or `HemsyEmbedConfig.incrementality`).
+2. **Incrementality Mode** is enabled on the store in the dashboard.
+
+Then, once per tab session:
+
+1. The embed POSTs `/api/incrementality/init` with the store slug and a visitor id.
+2. Hemsy assigns the visitor to **treatment** (90%) or **control** (10%). The assignment is stable for that visitor.
+3. Control visitors get a CSS hide on the selectors you saved in the dashboard (your Hemsy buttons, nav links, and any other CTAs).
+4. The Shopify Ajax cart is tagged with `hemsy_group` and `hemsy_visitor_id` so later orders can be bucketed.
+
+The result is cached in `sessionStorage` for the rest of that tab. Later pages in the same tab do not call init again. The hide styles are re-applied from that cache on each page load.
+
+<Note>
+  Add at least one CSS selector before enabling the dashboard toggle. One
+  selector per line: IDs or class names of every Hemsy CTA on the storefront.
+  If the holdout group has nothing to hide, both groups see Hemsy and the test
+  measures nothing.
+</Note>
+
+## Dashboard
+
+On **Incrementality** you can:
+
+- Enable or disable Incrementality Mode
+- Edit the holdout CSS selectors
+- Compare baseline vs Hemsy conversion, lift, and net new revenue over a date range
+
+Shopify must be connected. Metrics stay available when the mode is off; they reflect any earlier test data in the selected period.
+
+Dollar estimates stay hidden until there is enough data: at least 100 sessions in each group and at least 5 orders in the holdout group.
+
+The holdout split is fixed at 10% control. It is not merchant-configurable. Changing it mid-test would reassign visitors and contaminate the results.
