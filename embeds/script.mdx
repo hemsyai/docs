@@ -42,7 +42,6 @@ Use a shared class selector like `.hemsy-launcher` when multiple elements should
 | --- | --- | --- | --- |
 | `data-hemsy-subdomain` | Yes | `"mystore"` | Your Hemsy store subdomain. For `mystore.hemsy.ai`, use `"mystore"`. |
 | `data-hemsy-selector` | Yes | `".hemsy-launcher"` | CSS selector for elements that launch Hemsy. |
-| `data-hemsy-mode` | No | `"instant"` | Page-wide default for [Instant mode](/embeds/launch-modes#instant). Prefer setting `data-hemsy-mode="instant"` on individual launchers instead. |
 | `data-hemsy-action` | No | `"cart"` | Default final CTA behavior: `"checkout"` (default) opens Shopify checkout; `"cart"` hands items to your cart. Individual launchers can override it. See [Checkout vs Cart](/embeds/checkout-vs-cart). |
 | `data-hemsy-cart-strategy` | No | `"native"` | With the `cart` action, `"native"` makes Hemsy add returned items straight into the Shopify cart itself. Uses Shopify's Ajax cart API, which every Online Store theme has. See [Native cart strategy](/embeds/checkout-vs-cart#native-cart-strategy). |
 | `data-hemsy-anonymous-id` | No | `"visitor-42"` | Anonymous visitor ID passed through to Hemsy for analytics and order metadata. See [Segment](/segment). |
@@ -53,6 +52,6 @@ Event callbacks (`onItemAdded`, `onItemRemoved`, `onProductVariantData`) are con
 
 ## Rules worth knowing up front
 
-- Instant mode and the final action are **per launcher**: set `data-hemsy-mode="instant"` or `data-hemsy-action` on a launcher element to affect just that button. The same attributes on the script tag act as page-wide defaults. Instant and Share launchers coexist fine on the same page.
-- Prefer `data-hemsy-action` for checkout vs cart. The legacy script-level `data-hemsy-mode="cart"` still works for backward compatibility, but `data-hemsy-mode` should be reserved for `"instant"`.
+- Launch mode and the final action are **per launcher**: set `data-hemsy-share`, `data-hemsy-flow`, `data-hemsy-auto-product-context`, or `data-hemsy-action` on a launcher element to affect just that button. `data-hemsy-action` on the script tag acts as the page-wide default.
+- Prefer `data-hemsy-action` for checkout vs cart. The legacy script-level `data-hemsy-mode="cart"` still works for backward compatibility.
 - `data-hemsy-trigger` has no launcher semantics of its own. It's the conventional selector hook (`data-hemsy-selector="[data-hemsy-trigger]"`), which is what the [Shopify theme extension](/embeds/shopify) uses by default.

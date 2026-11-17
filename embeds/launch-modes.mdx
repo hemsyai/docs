@@ -1,39 +1,36 @@
 ---
 title: "Launch Modes"
-description: "Control what each click opens: Sandbox, PDP, Bundle, Share, Flow, or Instant Mode."
+description: "Control what each click opens: Sandbox, Product context, Share, or Flow."
 ---
 
 Every launcher element decides its own launch mode from the attributes on that exact clicked element. The attributes are the same whether the [Shopify trigger block](/embeds/shopify) emits them from theme editor settings or you write them by hand with the [script install](/embeds/script). This page covers each mode and the order they're resolved in.
+
+Every mode opens the same screen: the visualization on top (or on the left on desktop), a toolbar under it for share and download, and the look as a list of **layers** below it. Shoppers change a layer's color or size, swap its product, add or remove layers, then tap **Update preview** to re-render. Only the starting state differs by mode.
 
 ## Resolution order
 
 When a launcher is clicked, Hemsy picks the launch mode by checking, in order:
 
-1. **Instant**: instant is requested (`data-hemsy-mode="instant"` on the element itself, or on the script tag as a page-wide default) **and** the element has `data-hemsy-model`.
-2. **Share**: the element has `data-hemsy-share`.
-3. **Product**: the element has `data-hemsy-auto-product-context="true"`.
-4. **Bundle**: the element has `data-hemsy-closet`.
-5. **Sandbox**: none of the above; opens the full experience blank.
+1. **Share**: the element has `data-hemsy-share`.
+2. **Product context**: the element has `data-hemsy-auto-product-context="true"` and a variant is detected on the page.
+3. **Sandbox**: none of the above.
 
-`data-hemsy-flow` starts a guided flow when the launch has an empty look (Sandbox, or a flow-only launcher). Bundle (`data-hemsy-closet`) and Share launches skip the guided flow: closet bypass jumps straight to visualization after a photo is chosen, and share opens the shared-look viewer.
+`data-hemsy-flow` turns a Sandbox launch into a Flow launch: the look opens on the flow's starter look. On a Product context launch it opens the product [inside the flow](#product-context-in-a-flow) instead. Share launches already have a look, so they ignore it.
 
 `data-hemsy-action` (checkout vs cart) is independent of launch mode. It only changes what the final CTA does. See [Checkout vs Cart](/embeds/checkout-vs-cart).
 
 ## Launcher attributes
 
-| Attribute                         | Example         | Description                                                                                                  |
-| --------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------ |
-| `data-hemsy-share`                | `"FreyjHz4"`    | Opens a previously shared look by its short ID.                                                              |
-| `data-hemsy-auto-product-context` | `"true"`        | Auto-builds a product payload from the current PDP variant. Falls back to Sandbox if no variant is detected. |
-| `data-hemsy-closet`               | `"eyJwcm9k..."` | Explicit URL-safe base64 product payload. Use for Bundle mode.                                               |
-| `data-hemsy-flow`                 | `"<flowId>"`    | Starts a guided flow on an empty-look launch. Ignored for Bundle and Share. Must be on the clicked element.  |
-| `data-hemsy-mode`                 | `"instant"`     | Requests Instant mode for this launcher. `"instant"` is the only value with meaning at the launcher level.   |
-| `data-hemsy-model`                | `"<modelId>"`   | Model UUID for Instant mode. Takes effect when instant is requested on the element or the script tag.        |
-| `data-hemsy-action`               | `"cart"`        | Overrides the final CTA (`checkout` or `cart`) for this launcher only. See [Checkout vs Cart](/embeds/checkout-vs-cart). |
+| Attribute                         | Example      | Description                                                                                                              |
+| --------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| `data-hemsy-share`                | `"FreyjHz4"` | Opens a previously shared look by its short ID.                                                                          |
+| `data-hemsy-auto-product-context` | `"true"`     | Opens with the current PDP variant and renders it right away. Falls back to Sandbox if no variant is detected.           |
+| `data-hemsy-flow`                 | `"<flowId>"` | Opens the flow's starter look, or with Product context, the product in its flow step. Ignored for Share. Must be on the clicked element. |
+| `data-hemsy-action`               | `"cart"`     | Overrides the final CTA (`checkout` or `cart`) for this launcher only. See [Checkout vs Cart](/embeds/checkout-vs-cart). |
 
 ## Sandbox
 
-The default. No launcher attributes needed. The shopper starts blank and builds a look from your full catalog.
+The default. No launcher attributes needed. The shopper starts on your first model photo with an empty look, then adds items from your full catalog.
 
 ```html
 <a class="hemsy-launcher" href="#">Design a look</a>
@@ -41,7 +38,7 @@ The default. No launcher attributes needed. The shopper starts blank and builds 
 
 ## Product context (PDP)
 
-Launch with the product the shopper is currently viewing. Hemsy reads the selected variant from the page (the add-to-cart form or a `?variant=` URL parameter) and pre-loads it.
+Launch with the product the shopper is currently viewing. Hemsy reads the selected variant from the page (the add-to-cart form or a `?variant=` URL parameter), adds it as the first layer, and renders it on your first model photo without asking for a photo first.
 
 ```html
 <button class="hemsy-launcher" data-hemsy-auto-product-context="true">
@@ -51,40 +48,30 @@ Launch with the product the shopper is currently viewing. Hemsy reads the select
 
 If no variant can be detected, the launcher falls back to Sandbox mode.
 
-## Bundle
+### Product context in a flow
 
-Pre-load one or more specific products, curated looks, bundles, or campaign selections, with an explicit payload on `data-hemsy-closet`.
+Add `data-hemsy-flow` to a Product context launcher to open the product inside a flow, so shoppers see the rest of the look they could build around it:
 
 ```html
-<button class="hemsy-launcher" data-hemsy-closet="YOUR_URLSAFE_BASE64_PAYLOAD">
-  Visualize Bed Bundle
+<button
+  class="hemsy-launcher"
+  data-hemsy-auto-product-context="true"
+  data-hemsy-flow="YOUR_FLOW_ID"
+>
+  See it on your bed
 </button>
 ```
 
-The payload is a URL-safe base64 encoding of a JSON object listing products:
+- The product goes into the flow step whose scope (collection, tag, category, or metafield) covers it. A sheet set lands in the sheet set step, a throw in the throw step. If it fits several steps, the first one wins.
+- The flow's other steps open empty, ready to fill. The flow's starter picks and starter image are skipped.
+- The product renders right away on the flow's reference image, the same single render as a plain Product context launch.
+- A product no step covers still renders, as an extra layer below the flow's steps.
 
-```json
-{
-  "products": [
-    {
-      "variantId": 1234567890,
-      "attributes": [{ "key": "_bundleTitle", "value": "Starter Bundle" }]
-    }
-  ]
-}
-```
-
-<Note>
-  The attribute is named `data-hemsy-closet` for historical reasons. A "closet"
-  payload is how Bundle mode describes its products. The same payload format
-  powers `?closet=` deep links.
-</Note>
-
-For the full payload schema, bundle attribute keys (`_bundleId`, `_uniqueId`, and friends), encoding helpers, and a validation checklist, see [Deep Links](/deep-links#closet--structured-payload). Always wrap `data-hemsy-closet` values in quotes.
+The same works from the [JavaScript API](/embeds/javascript-api) and [deep links](/deep-links).
 
 ## Share
 
-Open a previously shared look by its short ID. Useful for marketing campaigns, emails, or featuring shopper-created looks on your storefront.
+Open a previously shared look by its short ID: the shopper's photo, the render, and every item. Useful for marketing campaigns, emails, or featuring shopper-created looks on your storefront.
 
 ```html
 <button class="hemsy-launcher" data-hemsy-share="FreyjHz4">
@@ -96,7 +83,7 @@ Share IDs are generated by Hemsy's in-app Share feature; you don't construct the
 
 ## Flow
 
-Launch a guided, step-by-step flow with an empty look:
+Open a flow on its **starter look**: a finished render with one layer per flow step, already filled in.
 
 ```html
 <button class="hemsy-launcher" data-hemsy-flow="YOUR_FLOW_ID">
@@ -104,57 +91,24 @@ Launch a guided, step-by-step flow with an empty look:
 </button>
 ```
 
-Copy flow IDs from the dashboard. The shopper walks the steps, then can exit into free browse. Do not combine `data-hemsy-flow` with Bundle or Share launchers: those paths skip the guided flow.
+Copy flow IDs from the dashboard's **Flows** page. Each flow sets up:
 
-## Instant
+- **Layers**: one per step, each scoped to a set of products. The shopper swaps a layer's product from that scope. Required layers can be swapped but not removed.
+- **Starter picks**: the product and variant each layer opens on.
+- **Reference image**: the photo the look renders on.
+- **Starter image**: a saved render of the starter picks on the reference image, generated from the flow editor. The shopper sees it the moment the flow opens, with no wait.
+- **Shared sizes** (optional): one size picker that sets the size on several layers at once, such as a bed size shared by the sheets, duvet, and coverlet. Hemsy matches each layer's own size names ("Cal. King", "King/Cal. King", and so on) to the shared value.
 
-Instant mode skips model selection and immediately generates a visualization with a specific model and product payload. The shopper clicks, sees the generation loading state, and lands on the result.
-
-Instant requires **both** pieces on the launcher element:
-
-1. `data-hemsy-mode="instant"` to request the instant path. (Putting it on the script tag instead makes instant the default for every launcher with a model.)
-2. `data-hemsy-model` for the model to generate with. Add `data-hemsy-closet` for the products to place on that model. If the model is missing, the instant path is skipped.
-
-```html
-<a
-  href="#"
-  class="hemsy-launcher"
-  data-hemsy-mode="instant"
-  data-hemsy-model="YOUR_MODEL_ID"
-  data-hemsy-closet="YOUR_URLSAFE_BASE64_PAYLOAD"
->
-  See it on a model
-</a>
-```
-
-### Getting model IDs
-
-Model IDs are UUIDs assigned to each image in your store's model library:
-
-1. Go to your store's **Models** page in the Hemsy dashboard.
-2. Hover over any model image.
-3. Click the copy icon in the bottom-left corner.
-
-### Instant is per-launcher
-
-Instant only affects the launcher that requests it. Share buttons, `?share=` links, and programmatic opens on the same page all work normally alongside instant launchers, with no separate script tags needed.
-
-Instant combines normally with `data-hemsy-action="cart"` if your storefront owns cart state. See [Checkout vs Cart](/embeds/checkout-vs-cart).
+If a flow has no starter image yet, the shopper sees the reference image with the starter picks listed and taps **Update preview** to render.
 
 ## URL auto-open
 
-The embed script watches the page URL for `?share=` and `?closet=` parameters and opens the modal automatically on page load:
+The embed script watches the page URL for `?share=` and opens the modal automatically on page load:
 
 ```
 https://your-store.com/?share=FreyjHz4
-https://your-store.com/?closet=eyJwcm9kdWN0cy...
 ```
 
-This powers share links (recipients see the look immediately) and marketing campaigns (pre-load products from ads or emails). The parameter is removed from the URL after opening so a refresh doesn't re-trigger it. For SPAs, the script also intercepts `history.pushState` to catch client-side navigations.
+This powers share links: recipients see the look immediately. The parameter is removed from the URL after opening so a refresh doesn't re-trigger it. For SPAs, the script also intercepts `history.pushState` to catch client-side navigations.
 
-<Note>
-  `?closet=` always opens a normal Bundle launch rather than instant
-  generation, since no model ID travels in the URL.
-</Note>
-
-For constructing these URLs, see [Deep Links](/deep-links).
+For links to the hosted experience, see [Deep Links](/deep-links).

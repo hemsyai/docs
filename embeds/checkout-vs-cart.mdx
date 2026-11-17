@@ -3,11 +3,11 @@ title: "Checkout vs Cart Resolution"
 description: "Choose what the final CTA does: open Shopify checkout, or hand variant data back to your storefront's own cart."
 ---
 
-When a shopper finishes a visualization, the result screen shows one final CTA. `data-hemsy-action` on the script tag sets the default, and any launcher element can override it with its own `data-hemsy-action`. It applies to every launch mode, including Instant.
+The layer screen has one final CTA under the look, labeled with the look's total. `data-hemsy-action` on the script tag sets the default, and any launcher element can override it with its own `data-hemsy-action`. It applies to every launch mode.
 
 | Action               | CTA label        | What happens                                                                                                                              |
 | -------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `checkout` (default) | "Go to Checkout" | Hemsy creates or opens a Shopify checkout/cart URL directly.                                                                              |
+| `checkout` (default) | "Checkout"       | Hemsy creates or opens a Shopify checkout/cart URL directly.                                                                              |
 | `cart`               | "Go to Cart"     | Hemsy posts the selected variants back to your page, calls `window.HemsyEmbedConfig.onProductVariantData(payload)`, and closes the modal. |
 
 In the [Shopify theme extension](/embeds/shopify), this is the app embed's "When shoppers finish" setting and each trigger block's override, with no attributes to write. The examples below show the equivalent [script install](/embeds/script) markup.
@@ -33,9 +33,9 @@ To override the action for a single launcher, put `data-hemsy-action` on the ele
 
 <Note>
   The legacy script-level `data-hemsy-mode="cart"` still maps to the cart
-  action for backward compatibility, but prefer `data-hemsy-action`:
-  `data-hemsy-mode` should be reserved for `"instant"`. (`data-hemsy-mode="checkout"`
-  has no effect; checkout is simply the default action.)
+  action for backward compatibility, but prefer `data-hemsy-action`.
+  (`data-hemsy-mode="checkout"` has no effect; checkout is simply the default
+  action.)
 </Note>
 
 ## Native cart strategy
@@ -103,11 +103,11 @@ Callbacks are configured on `window.HemsyEmbedConfig` (not data attributes). Def
 
 | Callback               | Payload                                                                                                         | Fires when                                    |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| `onItemAdded`          | `{ variantId: string, quantity: number }`                                                                       | An item is added to the bag inside Hemsy      |
-| `onItemRemoved`        | `{ variantId: string }`                                                                                         | An item is removed from the bag inside Hemsy  |
+| `onItemAdded`          | `{ variantId: string, quantity: number }`                                                                       | An item is added to the look inside Hemsy     |
+| `onItemRemoved`        | `{ variantId: string }`                                                                                         | An item is removed from the look inside Hemsy |
 | `onProductVariantData` | `{ items: Array<{ variantId: string, quantity: number, attributes?: Array<{ key: string, value: string }> }> }` | `action: "cart"` and the final CTA is clicked |
 
-`onItemAdded` and `onItemRemoved` fire live as the shopper edits their bag, regardless of action. `onProductVariantData` is the cart handoff itself: the `items` array includes any line-item attributes from the original payload (bundle keys and so on), so pass them through to your cart.
+`onItemAdded` and `onItemRemoved` fire live as the shopper edits their look (adding, removing, or swapping a layer), regardless of action. `onProductVariantData` is the cart handoff itself: the `items` array includes any line-item attributes on the items, so pass them through to your cart.
 
 ### Keeping the modal open
 

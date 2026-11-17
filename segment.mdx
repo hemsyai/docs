@@ -68,7 +68,7 @@ Works alongside other parameters:
 
 ```
 https://mystore.hemsy.ai?anonymous_id=visitor-42&flow=<flowId>
-https://mystore.hemsy.ai?anonymous_id=visitor-42&closet=<payload>
+https://mystore.hemsy.ai?anonymous_id=visitor-42&product=<handle>
 ```
 
 Use the same ID you use on your storefront and in Segment. When a shopper lands without `anonymous_id`, only Hemsy's generated visitor ID is used.
@@ -120,30 +120,21 @@ The same `sessionId` is attached to Shopify carts started from Hemsy as a hidden
 | Segment event              | When it fires                                                 | Event properties                                         |
 | -------------------------- | ------------------------------------------------------------- | -------------------------------------------------------- |
 | **Hemsy Try On Started**   | Shopper starts visualization generation (photo + at least one item). | `selectedItemCount`                                      |
-| **Hemsy Try On Completed** | Visualization succeeds and the result screen is shown.               | `selectedItemCount`                                      |
+| **Hemsy Try On Completed** | Visualization succeeds and the new render is shown.                  | `selectedItemCount`                                      |
 | **Hemsy Try On Failed**    | Visualization fails, returns without a generated image, or the store cannot generate (plan limit reached, model provider missing). | `reason`: e.g. `no_product_images`, `Generation failed`, `LIMIT_EXCEEDED`, `MERCHANT_MODEL_PROVIDER_REQUIRED`; `status`: HTTP status when a response was received; `code`: Hemsy error code when the response carried one |
 
 ### Look building
 
 | Segment event                  | When it fires                                 | Event properties |
 | ------------------------------ | --------------------------------------------- | ---------------- |
-| **Hemsy Added Item to Look**   | Shopper adds a product variant to their look. | `productTitle`   |
+| **Hemsy Added Item to Look**   | Shopper adds a product variant to their look, or swaps one in. | `productTitle`   |
+| **Hemsy Layer Changed**        | Shopper edits a layer: adds a layer, swaps or removes its product, changes its color or size, changes a shared size, starts over, or leaves the flow. | `flow_id` (null outside flows), `layer` (step title, product title, or shared-size label; null for `start_over` / `exit_flow`), `action`: `add`, `swap`, `remove`, `edit` (color or size changed on the same product), `size` (shared size), `start_over`, or `exit_flow` |
 | **Hemsy User Photo Uploaded**  | Shopper uploads a photo from their device.    | -                |
 | **Hemsy Model Photo Selected** | Shopper picks a photo from the model library. | `model_id`       |
 
-### Guided flows
-
-When a merchant **flow** is active (`data-hemsy-flow` on embed launchers, or `flow` query param on the hosted experience):
-
-| Segment event                 | When it fires                                                  | Event properties                         |
-| ----------------------------- | -------------------------------------------------------------- | ---------------------------------------- |
-| **Hemsy Flow Step Completed** | Shopper completes a flow step by adding an item and advancing. | `flow_name`, `flow_id`, `flow_step_name` |
-| **Hemsy Flow Step Skipped**   | Shopper skips a non-required step.                             | `flow_name`, `flow_id`, `flow_step_name` |
-| **Hemsy Flow Exited**         | Shopper leaves the guided flow.                                | `flow_name`, `flow_id`, `flow_step_name` |
-
 ### Browse, filter, and search
 
-In free-browse mode (no active flow):
+When the shopper adds an item from the full catalog:
 
 | Segment event              | When it fires                                | Event properties                              |
 | -------------------------- | -------------------------------------------- | --------------------------------------------- |
@@ -151,13 +142,12 @@ In free-browse mode (no active flow):
 | **Hemsy Sort Selected**    | Shopper changes sort (not "Featured").       | `sort_name`: `price-low`, `price-high`, etc. |
 | **Hemsy Search Submitted** | Shopper submits a catalog search (Enter).    | `query`, `result_count`                       |
 
-### Result screen
+### Share and checkout
 
 | Segment event              | When it fires                                                 | Event properties                                                                 |
 | -------------------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| **Hemsy Try On Edited**    | Shopper edits the look from the result screen.                | `action`: `edit`, `swap`, or `remove`                                           |
 | **Hemsy Checkout Clicked** | Shopper taps checkout (or cart handoff in embed `cart` mode). | `selectedItemCount`, `hasStorefrontToken`, `fromSharedLook`, `sharedLookShortId` |
-| **Hemsy Look Shared**      | Shopper shares the result.                                    | See [Hemsy Look Shared](#hemsy-look-shared) below.                               |
+| **Hemsy Look Shared**      | Shopper shares the render.                                    | See [Hemsy Look Shared](#hemsy-look-shared) below.                               |
 
 ### Hemsy Look Shared
 
